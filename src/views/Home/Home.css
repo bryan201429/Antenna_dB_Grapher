@@ -1,0 +1,17 @@
+#HomeContainer{
+    width: 100vw;
+    min-height: 100vh;
+    background-color: rgb(83, 83, 83);
+    padding-top: 1vh;
+    margin: 0;
+}
+.ChartContainer{
+    padding: 0;
+    margin: 0;
+    width: fit-content;
+    height: 600px;
+}
+.plotChart{
+    width: 50vw;
+    height: 50vh;
+}
