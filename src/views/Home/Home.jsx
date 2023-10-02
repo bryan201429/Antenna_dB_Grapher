@@ -5,6 +5,10 @@ import Plot from 'react-plotly.js';
 
 export default function Home(){
     const [dataCSV,setDataCSV]=useState(); 
+    const [headers,setHeaders]=useState(null);
+    const [theta,setTheta]=useState([]);
+    const [potDbScal,setPotDbScal]=useState([]);
+
     const [data,setData]=useState([
             {
                 type: 'scatterpolar',
@@ -62,7 +66,8 @@ export default function Home(){
         
         if(dataCSV){
             // console.log(dataCSV);
-            const headers = dataCSV[0];
+            // const headers = dataCSV[0];
+            setHeaders(dataCSV[0]);
             const rows = dataCSV.slice(1);
             // console.log('rows sin headers',rows)
             const csvDataLong=rows.length;
@@ -177,6 +182,8 @@ export default function Home(){
             console.log('Angulos ordenados: ',ang);
             console.log('Lista dist:',dist);
             console.log('Lista db escalados',listadbscal);
+            setTheta(ang);
+            setPotDbScal(listadbscal);
 
             //! ////////////////////		GRAFICO POLAR		////////////////
 
@@ -195,7 +202,7 @@ export default function Home(){
     return(
         <div id='HomeContainer'>
             <div className='ChartContainer'>
-                <h1>Gráfico Polar con React y Plotly</h1>
+                <h1>Graficador Polar</h1>
                 <Plot
                     data={data}
                     layout={layout}
@@ -203,9 +210,28 @@ export default function Home(){
                     className='plotChart'
                 />
             </div>
-            <input type='file' accept='.csv' onChange={handleFileChange}></input>
+            <input type='file' accept='.csv' onChange={handleFileChange} className='inputFile'></input>
 
+        <table className='dataTable'>
+            <thead>
+                {/* <tr>
+                    {headers&& headers.map((header,i)=>{    
+                        return <th key={i}>{header}</th>
+                    })}
+                </tr> */}
+                <th>Sample</th>
+                <th>Theta</th>
+                <th>Pot</th>
+                <th>Dist</th>
 
+            </thead>
+            <tbody> 
+                {theta&&theta.map((column,i)=>{
+                    return <tr> <td>{i}</td><td>{theta[i]}</td> <td>{potDbScal[i]}</td> </tr>
+                })}
+
+            </tbody>
+        </table>
         </div>
     )
 }
