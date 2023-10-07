@@ -2,13 +2,14 @@ import './Home.css'
 import { useEffect, useState } from 'react';
 import React from 'react';
 import Plot from 'react-plotly.js';
+import background from '../../assets/waves.jpeg'
 
 export default function Home(){
     const [dataCSV,setDataCSV]=useState(); 
     const [headers,setHeaders]=useState(null);
     const [theta,setTheta]=useState([]);
     const [potDbScal,setPotDbScal]=useState([]);
-
+    const [distances,setDistances]=useState([]);
     const [data,setData]=useState([
             {
                 type: 'scatterpolar',
@@ -184,6 +185,7 @@ export default function Home(){
             console.log('Lista db escalados',listadbscal);
             setTheta(ang);
             setPotDbScal(listadbscal);
+            setDistances(dist);
 
             //! ////////////////////		GRAFICO POLAR		////////////////
 
@@ -200,7 +202,7 @@ export default function Home(){
     },[dataCSV])
 
     return(
-        <div id='HomeContainer'>
+        <div id='HomeContainer' background={background}>
             <div className='ChartContainer'>
                 <h1>Graficador Polar</h1>
                 <Plot
@@ -212,26 +214,29 @@ export default function Home(){
             </div>
             <input type='file' accept='.csv' onChange={handleFileChange} className='inputFile'></input>
 
-        <table className='dataTable'>
-            <thead>
-                {/* <tr>
-                    {headers&& headers.map((header,i)=>{    
-                        return <th key={i}>{header}</th>
+        <div className='tableContainer'>
+            <table className='dataTable'>
+                <thead>
+                    {/* <tr>
+                        {headers&& headers.map((header,i)=>{    
+                            return <th key={i}>{header}</th>
+                        })}
+                    </tr> */}
+                    <th>Sample</th>
+                    <th>Theta</th>
+                    <th>Pot</th>
+                    <th>Dist</th>
+
+                </thead>
+                <tbody> 
+                    {theta&&theta.map((column,i)=>{
+                        return <tr> <td>{i}</td><td>{theta[i]}</td> <td>{potDbScal[i]}</td> <td>{distances[i]}</td> </tr>
                     })}
-                </tr> */}
-                <th>Sample</th>
-                <th>Theta</th>
-                <th>Pot</th>
-                <th>Dist</th>
 
-            </thead>
-            <tbody> 
-                {theta&&theta.map((column,i)=>{
-                    return <tr> <td>{i}</td><td>{theta[i]}</td> <td>{potDbScal[i]}</td> </tr>
-                })}
-
-            </tbody>
-        </table>
+                </tbody>
+            </table>
+    
         </div>
+               </div>
     )
 }
