@@ -34,8 +34,8 @@ export default function Home(){
             }
         },
         showlegend: false,
-        width:800,
-        height:500
+        width:500,
+        height:500,
     };
 
     const handleFileChange= async(e)=>{
@@ -202,9 +202,15 @@ export default function Home(){
     },[dataCSV])
 
     return(
-        <div id='HomeContainer' background={background}>
+        <div id='Home'>
+            <div id='title'>
+        <h1>Graficador Polar</h1>
+            </div>
+        
+        <div id='HomeContainer'>
+            
             <div className='ChartContainer'>
-                <h1>Graficador Polar</h1>
+               
                 <Plot
                     data={data}
                     layout={layout}
@@ -212,7 +218,7 @@ export default function Home(){
                     className='plotChart'
                 />
             </div>
-            <input type='file' accept='.csv' onChange={handleFileChange} className='inputFile'></input>
+            
 
         <div className='tableContainer'>
             <table className='dataTable'>
@@ -236,7 +242,9 @@ export default function Home(){
                 </tbody>
             </table>
     
-        </div>
+            </div>
                </div>
+               <input type='file' accept='.csv' onChange={handleFileChange} className='inputFile'></input>
+        </div>
     )
 }
