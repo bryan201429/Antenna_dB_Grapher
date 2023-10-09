@@ -34,8 +34,12 @@ export default function Home(){
             }
         },
         showlegend: false,
-        width:500,
-        height:500,
+        autosize:true,
+        bgcolor: 'lightblue',
+        title:{
+            text: 'Graficador '
+        }
+        
     };
 
     const handleFileChange= async(e)=>{
@@ -214,7 +218,8 @@ export default function Home(){
                 <Plot
                     data={data}
                     layout={layout}
-                    config={{ responsive: true }}
+                    config={{ responsive: true, useResizeHandler:true }}
+                    useResizeHandler={true}
                     className='plotChart'
                 />
             </div>

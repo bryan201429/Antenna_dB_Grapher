@@ -7,7 +7,8 @@
   width: fit-content;
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
-  background-color: #ff0202;
+  /* background-color: #ff0202; */
+
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -19,4 +20,8 @@ overflow-x: hidden;
 body{
   margin: 0;
   padding: 0;
+  background-image: url('./assets/waves5.webp');
+  background-size: cover; /* Esto asegura que la imagen cubra todo el contenedor */
+  background-position: center; /* Esto centra la imagen */
+  background-repeat: no-repeat;
 }
