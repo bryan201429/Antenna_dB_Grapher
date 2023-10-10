@@ -2,7 +2,6 @@ import './Home.css'
 import { useEffect, useState } from 'react';
 import React from 'react';
 import Plot from 'react-plotly.js';
-import background from '../../assets/waves.jpeg'
 
 export default function Home(){
     const [dataCSV,setDataCSV]=useState(); 
@@ -18,14 +17,7 @@ export default function Home(){
                 fill: 'toself'
             }
         ]);
-    // const data = [
-    //     {
-    //         type: 'scatterpolar',
-    //         r: [1, 2, 3, 4],
-    //         theta: [0, 45.999999988888, 90, 180],
-    //         fill: 'toself'
-    //     }
-    // ];
+
     const layout = {
         polar: {
             radialaxis: {
@@ -39,42 +31,31 @@ export default function Home(){
         title:{
             text: 'Graficador '
         }
-        
     };
 
     const handleFileChange= async(e)=>{
         if(e.target.files){
             try{
                 const file = e.target.files[0];
-
                 // 1. create url from the file
                 const fileUrl = URL.createObjectURL(file);
-        
                 // 2. use fetch API to read the file
                 const response = await fetch(fileUrl);
                    // 3. get the text from the response
                 const text = await response.text();
-
                 // 4. split the text by newline
                 const lines = text.split("\n");
                 setDataCSV( lines.map((line) => line.split(","))); // Array de arrays
-                
             }
             catch(error){console.log(error)}
-            
         }
-        
-        
     }
 
     useEffect(()=>{
         
         if(dataCSV){
-            // console.log(dataCSV);
-            // const headers = dataCSV[0];
             setHeaders(dataCSV[0]);
             const rows = dataCSV.slice(1);
-            // console.log('rows sin headers',rows)
             const csvDataLong=rows.length;
             let temporal=0;
             let menor=0;
@@ -94,10 +75,9 @@ export default function Home(){
                 lat[x]=rows[x][1];
                 lon[x]=rows[x][2];
                 alt[x]=rows[x][3];
-                // console.log(pot[x]);
             }
 
-            let lat1 = -16.41750065976074; lat1 = lat1 * 3.1415926 / 180
+            let lat1 = -16.41750065976074; lat1 = lat1 * 3.1415926 / 180;
             let lon1 = -71.54966328952415; lon1 = lon1 * 3.1415926 / 180;
 
             for(let x=0;x<csvDataLong;x++){
@@ -137,21 +117,16 @@ export default function Home(){
             //Escalar los demás valores al de distancia máxima :
             //Hallar potencia en transmisor :
             //Potenciatx = Potrx + PathLoss
-            
+                // distmax=200;
             for (let x = 0; x < csvDataLong; x++) {
                 if (dist[x] == distmax) {
                     listadbscal[x] = pot[x];
                 }
                 else if (dist[x]<distmax) {
-                    // listadbscal[x] = pot[x] + (20 * Math.log10(distmax)) - (20 * Math.log10(dist[x]));
                     listadbscal[x] =  pot[x]+(20 * Math.log10(distmax))-(20*Math.log10(dist[x]));
-                    // console.log('listadbscal[]','x',x,':',listadbscal[x],'y pot[];',pot[x])
-                    
                 }
             }		
-
-
-            
+           
             // console.log('Lista dist PREV:',dist);
             // console.log('Lista db PREV',pot);
             // console.log('Lista db escalados PREV',listadbscal);
@@ -228,11 +203,6 @@ export default function Home(){
         <div className='tableContainer'>
             <table className='dataTable'>
                 <thead>
-                    {/* <tr>
-                        {headers&& headers.map((header,i)=>{    
-                            return <th key={i}>{header}</th>
-                        })}
-                    </tr> */}
                     <th>Sample</th>
                     <th>Theta</th>
                     <th>Pot</th>
@@ -250,6 +220,7 @@ export default function Home(){
             </div>
                </div>
                <input type='file' accept='.csv' onChange={handleFileChange} className='inputFile'></input>
+               <input type='range' name='distancia' min='0' max='100' step='1'></input>
         </div>
     )
 }
