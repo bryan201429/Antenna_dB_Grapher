@@ -126,7 +126,6 @@ export default function Home(){
             //Escalar los demás valores al de distancia máxima :
             //Hallar potencia en transmisor :
             //Potenciatx = Potrx + PathLoss
-                // distmax=200;
 
             for (let x = 0; x < csvDataLong; x++) {
                 if (dist[x] == distmax) {
