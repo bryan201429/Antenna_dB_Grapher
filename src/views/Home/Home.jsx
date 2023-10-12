@@ -50,6 +50,15 @@ export default function Home(){
             catch(error){console.log(error)}
         }
     }
+    const handleSliderChange = (e)=>{
+        // console.log(e.target.value)
+        const textBox=document.querySelector('#inputTextBox');
+        textBox.value=e.target.value;
+    }
+    const handleTextBoxChange=(e)=>{
+        const slideInput=document.querySelector('#slideInput');
+        slideInput.value=e.target.value
+    }
 
     useEffect(()=>{
         
@@ -118,6 +127,7 @@ export default function Home(){
             //Hallar potencia en transmisor :
             //Potenciatx = Potrx + PathLoss
                 // distmax=200;
+
             for (let x = 0; x < csvDataLong; x++) {
                 if (dist[x] == distmax) {
                     listadbscal[x] = pot[x];
@@ -220,7 +230,8 @@ export default function Home(){
             </div>
                </div>
                <input type='file' accept='.csv' onChange={handleFileChange} className='inputFile'></input>
-               <input type='range' name='distancia' min='0' max='100' step='1'></input>
+               <input type='range' name='distancia' min='0' max='100' step='1' onChange={handleSliderChange} id='slideInput'></input>
+               <input type='textbox' id='inputTextBox' min='0' max='100' onChange={handleTextBoxChange}></input>
         </div>
     )
 }
