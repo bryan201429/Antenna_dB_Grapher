@@ -9,6 +9,9 @@ export default function Home(){
     const [theta,setTheta]=useState([]);
     const [potDbScal,setPotDbScal]=useState([]);
     const [distances,setDistances]=useState([]);
+    const [maxPotForScale,setMaxPotForScale]=useState(20);
+    const [minPotForScale,setMinPotForScale]=useState(-20);
+    const [maxDistance,setMaxDistance]=useState(0);
     const [data,setData]=useState([
             {
                 type: 'scatterpolar',
@@ -22,7 +25,7 @@ export default function Home(){
         polar: {
             radialaxis: {
                 visible: true,
-                range: [0, 50]  // Rango del eje radial
+                range: [minPotForScale, maxPotForScale]  // Rango del eje radial
             }
         },
         showlegend: false,
@@ -57,7 +60,11 @@ export default function Home(){
     }
     const handleTextBoxChange=(e)=>{
         const slideInput=document.querySelector('#slideInput');
+        if(e.target.value<minPotForScale){
+            e.target.value=minPotForScale; //Limitador de valor menor
+        }
         slideInput.value=e.target.value
+        
     }
 
     useEffect(()=>{
@@ -115,24 +122,30 @@ export default function Home(){
             
             let listadbscal = [];    //Guardará los valores de db escalados
 
-            let distmax=0;
+            // let distmax=0;
 
             for(let x=0;x<csvDataLong;x++){ //Hallar distancia más lejana
-                if(dist[x]>distmax){
-                    distmax=dist[x];
+                if(dist[x]>maxDistance){
+                    // distmax=dist[x];
+                    setMaxDistance(dist[x]);
                 }
             }
-            // console.log('La dist max es: ', distmax);
+            
+            
+            // distmax=2000;
+            console.log('La dist max es: ', maxDistance);
             //Escalar los demás valores al de distancia máxima :
             //Hallar potencia en transmisor :
             //Potenciatx = Potrx + PathLoss
 
             for (let x = 0; x < csvDataLong; x++) {
-                if (dist[x] == distmax) {
+                if (dist[x] == maxDistance) {
                     listadbscal[x] = pot[x];
                 }
-                else if (dist[x]<distmax) {
-                    listadbscal[x] =  pot[x]+(20 * Math.log10(distmax))-(20*Math.log10(dist[x]));
+                else if (dist[x]<maxDistance) {
+                    // listadbscal[x] =  pot[x]+(20 * Math.log10(distmax))-(20*Math.log10(dist[x]));
+                    let FSPL=(20*Math.log10(maxDistance-dist[x]))+(20*Math.log10(300000))+(20*Math.log10(1.326e-8));
+                    listadbscal[x] =  pot[x]-FSPL
                 }
             }		
            
@@ -174,6 +187,8 @@ export default function Home(){
             setTheta(ang);
             setPotDbScal(listadbscal);
             setDistances(dist);
+            setMaxPotForScale(Math.max(...listadbscal));
+            setMinPotForScale(Math.min(...listadbscal));
 
             //! ////////////////////		GRAFICO POLAR		////////////////
 
@@ -187,7 +202,11 @@ export default function Home(){
             ];
             setData(datagraph);
         }
-    },[dataCSV])
+    },[dataCSV,maxDistance])
+
+
+
+
 
     return(
         <div id='Home'>
@@ -229,8 +248,8 @@ export default function Home(){
             </div>
                </div>
                <input type='file' accept='.csv' onChange={handleFileChange} className='inputFile'></input>
-               <input type='range' name='distancia' min='0' max='100' step='1' onChange={handleSliderChange} id='slideInput'></input>
-               <input type='textbox' id='inputTextBox' min='0' max='100' onChange={handleTextBoxChange}></input>
+               <input type='range' name='distancia' min={minPotForScale} max='100' step='0.5' onChange={handleSliderChange} id='slideInput'></input>
+               <input type='textbox' id='inputTextBox' min={minPotForScale} max='100' onChange={handleTextBoxChange}></input>
         </div>
     )
 }
