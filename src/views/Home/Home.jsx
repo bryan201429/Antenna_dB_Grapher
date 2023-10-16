@@ -25,7 +25,7 @@ export default function Home(){
         polar: {
             radialaxis: {
                 visible: true,
-                range: [minPotForScale, maxPotForScale]  // Rango del eje radial
+                range: [minPotForScale-1, maxPotForScale+1]  // Rango del eje radial
             }
         },
         showlegend: false,
@@ -131,8 +131,7 @@ export default function Home(){
                 }
             }
             
-            
-            // distmax=2000;
+            // setMaxDistance(1000);
             console.log('La dist max es: ', maxDistance);
             //Escalar los demás valores al de distancia máxima :
             //Hallar potencia en transmisor :
