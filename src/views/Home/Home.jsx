@@ -9,6 +9,7 @@ export default function Home(){
     const [theta,setTheta]=useState([]);
     const [dbOriginal,setDbOriginal]=useState([]);
     const [potDbScal,setPotDbScal]=useState([]);
+    const [dbPrediction,setDbPrediction]=useState([]);
     const [distances,setDistances]=useState([]);
     const [maxPotForScale,setMaxPotForScale]=useState(20);
     const [minPotForScale,setMinPotForScale]=useState(-20);
@@ -63,32 +64,36 @@ export default function Home(){
     }
     const handleTextBoxChange=(e)=>{        //!Slider Prediction Value
         const slideInput=document.querySelector('#slideInput');
-        if(e.target.value<minPotForScale){
-            e.target.value=minPotForScale; //Limitador de valor menor
-        }
+        // if(e.target.value<minPotForScale){
+        //     e.target.value=minPotForScale; //Limitador de valor menor
+        // }
         slideInput.value=e.target.value
         setDistanceToScal(e.target.value);   
     }
-
-    const handlePredictionClick=()=>{
+    //! /////////////////////////// Predicción //////////////////
+    const handlePredictionClick=()=>{                               
         // console.log('los ang:',theta);
         let angs=theta;
         // console.log('potsScaled',potDbScal);
         let pots=potDbScal;
-        let dist=distances
-        pots=pots.map(el=>{return el+10})
-        console.log('nuevos pots',pots,'distancias nuevas:',dist);
+        let dist=distances;
+        let distPrediction=distanceToScal;
+        // pots=pots.map(el=>{return el+10})
         
-        // pots=pots.map(pot=>{
-        //     let FSPL=(20*Math.log10(maxDistance-dist[x]))+(20*Math.log10(300000))+(20*Math.log10(1.326e-8));
-        //     listadbscal[x] =  pot[x]-FSPL
-        //     return( )
-        // })
-
         
-        setPotDbScal(pots);
+            pots=pots.map((pot,i)=>{
+                let FSPL=(20*Math.log10(distPrediction-dist[i]))+(20*Math.log10(300000))+(20*Math.log10(1.326e-8));
+                pot =  pot-FSPL;
+                return  pot;
+            })
+        
+        
+        console.log('nuevos pots',pots,'distancias nuevas:',distPrediction);
+        setDbPrediction(pots);
+        // setPotDbScal(pots);
 
     }
+    //! ///////////////////////////////////////////////////////////////
 
     useEffect(()=>{
         
@@ -136,10 +141,10 @@ export default function Home(){
 
                 dist[x]=Base;
                 ang[x]=Bearing;
-                console.log('------x es: ---', x);
-                console.log('Potencia: ',pot[x]);
-                console.log('Distancia: ',dist[x]);
-                console.log('Bearing: ',ang[x]);
+                // console.log('------x es: ---', x);
+                // console.log('Potencia: ',pot[x]);
+                // console.log('Distancia: ',dist[x]);
+                // console.log('Bearing: ',ang[x]);
             }
             //! //////////// REDIMENSIONADO DE POTENCIA PARA GRAFICAR ///////////////////////
             
@@ -260,11 +265,12 @@ export default function Home(){
                     <th>DistScal</th>
                     <th>PotOriginal</th>
                     <th>DistOriginal</th>
+                    <th>PotPredicted</th>
 
                 </thead>
                 <tbody> 
                     {theta&&theta.map((column,i)=>{
-                        return <tr> <td>{i}</td><td>{theta[i]}</td> <td>{potDbScal[i]}</td> <td>{maxDistance}</td> <td>{dbOriginal[i]}</td> <td>{distances[i]}</td> </tr>
+                        return <tr> <td>{i}</td><td>{theta[i]}</td> <td>{potDbScal[i]}</td> <td>{maxDistance}</td> <td>{dbOriginal[i]}</td> <td>{distances[i]}</td><td>{dbPrediction[i]}</td> </tr>
                     })}
 
                 </tbody>
