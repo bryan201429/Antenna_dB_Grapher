@@ -7,11 +7,13 @@ export default function Home(){
     const [dataCSV,setDataCSV]=useState(); 
     const [headers,setHeaders]=useState(null);
     const [theta,setTheta]=useState([]);
+    const [dbOriginal,setDbOriginal]=useState([]);
     const [potDbScal,setPotDbScal]=useState([]);
     const [distances,setDistances]=useState([]);
     const [maxPotForScale,setMaxPotForScale]=useState(20);
     const [minPotForScale,setMinPotForScale]=useState(-20);
     const [maxDistance,setMaxDistance]=useState(0);
+    const [distanceToScal,setDistanceToScal]=useState(0);
     const [data,setData]=useState([
             {
                 type: 'scatterpolar',
@@ -53,18 +55,39 @@ export default function Home(){
             catch(error){console.log(error)}
         }
     }
-    const handleSliderChange = (e)=>{
+    const handleSliderChange = (e)=>{       //!Slider Prediction Value
         // console.log(e.target.value)
         const textBox=document.querySelector('#inputTextBox');
         textBox.value=e.target.value;
+        setDistanceToScal(e.target.value);
     }
-    const handleTextBoxChange=(e)=>{
+    const handleTextBoxChange=(e)=>{        //!Slider Prediction Value
         const slideInput=document.querySelector('#slideInput');
         if(e.target.value<minPotForScale){
             e.target.value=minPotForScale; //Limitador de valor menor
         }
         slideInput.value=e.target.value
+        setDistanceToScal(e.target.value);   
+    }
+
+    const handlePredictionClick=()=>{
+        // console.log('los ang:',theta);
+        let angs=theta;
+        // console.log('potsScaled',potDbScal);
+        let pots=potDbScal;
+        let dist=distances
+        pots=pots.map(el=>{return el+10})
+        console.log('nuevos pots',pots,'distancias nuevas:',dist);
         
+        // pots=pots.map(pot=>{
+        //     let FSPL=(20*Math.log10(maxDistance-dist[x]))+(20*Math.log10(300000))+(20*Math.log10(1.326e-8));
+        //     listadbscal[x] =  pot[x]-FSPL
+        //     return( )
+        // })
+
+        
+        setPotDbScal(pots);
+
     }
 
     useEffect(()=>{
@@ -136,6 +159,7 @@ export default function Home(){
             //Escalar los demás valores al de distancia máxima :
             //Hallar potencia en transmisor :
             //Potenciatx = Potrx + PathLoss
+            setDbOriginal(pot);  //!Guardar la pot original sin escalar
 
             for (let x = 0; x < csvDataLong; x++) {
                 if (dist[x] == maxDistance) {
@@ -144,7 +168,7 @@ export default function Home(){
                 else if (dist[x]<maxDistance) {
                     // listadbscal[x] =  pot[x]+(20 * Math.log10(distmax))-(20*Math.log10(dist[x]));
                     let FSPL=(20*Math.log10(maxDistance-dist[x]))+(20*Math.log10(300000))+(20*Math.log10(1.326e-8));
-                    listadbscal[x] =  pot[x]-FSPL
+                    listadbscal[x] =  pot[x]-FSPL;
                 }
             }		
            
@@ -233,12 +257,14 @@ export default function Home(){
                     <th>Sample</th>
                     <th>Theta</th>
                     <th>Pot</th>
-                    <th>Dist</th>
+                    <th>DistScal</th>
+                    <th>PotOriginal</th>
+                    <th>DistOriginal</th>
 
                 </thead>
                 <tbody> 
                     {theta&&theta.map((column,i)=>{
-                        return <tr> <td>{i}</td><td>{theta[i]}</td> <td>{potDbScal[i]}</td> <td>{distances[i]}</td> </tr>
+                        return <tr> <td>{i}</td><td>{theta[i]}</td> <td>{potDbScal[i]}</td> <td>{maxDistance}</td> <td>{dbOriginal[i]}</td> <td>{distances[i]}</td> </tr>
                     })}
 
                 </tbody>
@@ -247,8 +273,9 @@ export default function Home(){
             </div>
                </div>
                <input type='file' accept='.csv' onChange={handleFileChange} className='inputFile'></input>
-               <input type='range' name='distancia' min={minPotForScale} max='100' step='0.5' onChange={handleSliderChange} id='slideInput'></input>
-               <input type='textbox' id='inputTextBox' min={minPotForScale} max='100' onChange={handleTextBoxChange}></input>
+               <input type='range' name='distancia' min={0} max='300' step='0.5' onChange={handleSliderChange} id='slideInput'></input>
+               <input type='textbox' id='inputTextBox' min={0} max='300' onChange={handleTextBoxChange}></input>
+               <button id='predictionButton' onClick={handlePredictionClick}>Prediction</button>
         </div>
     )
 }

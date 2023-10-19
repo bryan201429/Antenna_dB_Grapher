@@ -8,7 +8,6 @@ min-height: 100vh;
 }
 #HomeContainer{
     width: 100vw;
-   
     background-color: rgba(0, 0, 0,0);
     padding-top: 1vh;
     margin: 0;
@@ -16,11 +15,6 @@ min-height: 100vh;
     flex-direction: row;
     align-items: center;
     justify-content: space-evenly;
-    /* background-image: url('../../assets/waves5.webp');
-    background-size: cover; /* Esto asegura que la imagen cubra todo el contenedor */
-   /* background-position: center; /* Esto centra la imagen */
-    /* background-repeat: no-repeat;  */
-
 }
 .inputFile{
     position:relative;
@@ -52,7 +46,7 @@ min-height: 100vh;
     /* margin-top: 1vw; */
 }
 .tableContainer{
-    width: 43vw;
+    width: 52vw;
     min-height: 65vh;
     background-color: rgba(255, 255, 255, 0.5);
     backdrop-filter: blur(1px);
@@ -60,7 +54,7 @@ min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 5vh;
+    padding: 2vh;
 }
 .dataTable{
     background-color: rgb(255, 255, 255);
@@ -77,4 +71,5 @@ min-height: 100vh;
     border: 1px solid #000000;
     padding: 1px;
     text-align: center;
+    width: fit-content;
 }
