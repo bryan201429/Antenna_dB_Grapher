@@ -76,19 +76,35 @@ export default function Home(){
         let angs=theta;
         // console.log('potsScaled',potDbScal);
         let pots=potDbScal;
-        let dist=distances;
+        // let dist=distances;
+        // let dist=maxDistance;
         let distPrediction=distanceToScal;
         // pots=pots.map(el=>{return el+10})
         
+         let FSPL=0;
+
+         pots = pots.map((pot) => {
+            let FSPL;
+            if (distPrediction > maxDistance) {
+                FSPL = 20 * Math.log10(Math.abs(distPrediction-maxDistance)) + 20 * Math.log10(3000000) + 20 * Math.log10(4 * Math.PI / 3e8);
+                console.log('FSPL MAYOR: ',20 * Math.log10(Math.abs(distPrediction-maxDistance)),' cte: ',20 * Math.log10(3000000) + 20 * Math.log10(4 * Math.PI / 3e8))
+                // console.log('MAYOR', 'distPrediction>maxDistance: Pot=', pot, ' FSPL: ', FSPL, ' maxDistance: ', maxDistance, ' distPrediction: ', distPrediction,'potPredicted: ', pot-FSPL);
+                // pot = pot - FSPL;
+                pot = FSPL;
+                
+            } else if (distPrediction < maxDistance) {
+                FSPL = 20 * Math.log10(Math.abs(distPrediction-maxDistance)) + 20 * Math.log10(3000000) + 20 * Math.log10(4 * Math.PI / 3e8);
+                console.log('FSPL MENOR: ',20 * Math.log10(Math.abs(distPrediction-maxDistance)),' cte: ',20 * Math.log10(3000000) + 20 * Math.log10(4 * Math.PI / 3e8));
+                // console.log('MENOR', 'distPrediction<maxDistance: Pot=', pot, ' FSPL: ', FSPL, ' maxDistance: ', maxDistance, ' distPrediction: ', distPrediction,'potPredicted: ', pot+FSPL);
+                // pot = pot + FSPL;
+                pot = FSPL;
+            }
+            return pot;
+        });
         
-            pots=pots.map((pot,i)=>{
-                let FSPL=(20*Math.log10(distPrediction-dist[i]))+(20*Math.log10(300000))+(20*Math.log10(1.326e-8));
-                pot =  pot-FSPL;
-                return  pot;
-            })
         
         
-        console.log('nuevos pots',pots,'distancias nuevas:',distPrediction);
+        // console.log('nuevos pots',pots,'distancias nuevas:',distPrediction);
         setDbPrediction(pots);
         // setPotDbScal(pots);
 
