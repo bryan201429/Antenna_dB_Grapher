@@ -86,18 +86,19 @@ export default function Home(){
          pots = pots.map((pot) => {
             let FSPL;
             if (distPrediction > maxDistance) {
-                FSPL = 20 * Math.log10(Math.abs(distPrediction-maxDistance)) + 20 * Math.log10(3000000) + 20 * Math.log10(4 * Math.PI / 3e8);
+                FSPL = 20 * Math.log10(Math.abs(distPrediction-maxDistance)) - 20 * Math.log10(3000000) - 20 * Math.log10(4 * Math.PI / 3e8);
                 console.log('FSPL MAYOR: ',20 * Math.log10(Math.abs(distPrediction-maxDistance)),' cte: ',20 * Math.log10(3000000) + 20 * Math.log10(4 * Math.PI / 3e8))
                 // console.log('MAYOR', 'distPrediction>maxDistance: Pot=', pot, ' FSPL: ', FSPL, ' maxDistance: ', maxDistance, ' distPrediction: ', distPrediction,'potPredicted: ', pot-FSPL);
-                // pot = pot - FSPL;
-                pot = FSPL;
+                pot = pot - Math.abs(FSPL);
+                // pot = FSPL;
                 
             } else if (distPrediction < maxDistance) {
                 FSPL = 20 * Math.log10(Math.abs(distPrediction-maxDistance)) + 20 * Math.log10(3000000) + 20 * Math.log10(4 * Math.PI / 3e8);
                 console.log('FSPL MENOR: ',20 * Math.log10(Math.abs(distPrediction-maxDistance)),' cte: ',20 * Math.log10(3000000) + 20 * Math.log10(4 * Math.PI / 3e8));
+                
                 // console.log('MENOR', 'distPrediction<maxDistance: Pot=', pot, ' FSPL: ', FSPL, ' maxDistance: ', maxDistance, ' distPrediction: ', distPrediction,'potPredicted: ', pot+FSPL);
-                // pot = pot + FSPL;
-                pot = FSPL;
+                pot = pot + FSPL;
+                // pot = FSPL;
             }
             return pot;
         });
