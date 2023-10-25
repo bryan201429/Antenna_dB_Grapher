@@ -35,7 +35,7 @@ export default function Home(){
         autosize:true,
         bgcolor: 'lightblue',
         title:{
-            text: 'Graficador '
+            text: 'Radiation Pattern (Polar Plot) '
         }
     };
 
@@ -256,7 +256,7 @@ export default function Home(){
     return(
         <div id='Home'>
             <div id='title'>
-        <h1>Graficador Polar</h1>
+        <h1>Graficador polar de diagrama de radiación</h1>
             </div>
         
         <div id='HomeContainer'>
@@ -296,6 +296,7 @@ export default function Home(){
             </div>
                </div>
                <input type='file' accept='.csv' onChange={handleFileChange} className='inputFile'></input>
+               
                <input type='range' name='distancia' min={0} max='300' step='0.5' onChange={handleSliderChange} id='slideInput'></input>
                <input type='textbox' id='inputTextBox' min={0} max='300' onChange={handleTextBoxChange}></input>
                <button id='predictionButton' onClick={handlePredictionClick}>Prediction</button>
