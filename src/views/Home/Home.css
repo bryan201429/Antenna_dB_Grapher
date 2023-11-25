@@ -72,18 +72,18 @@ input[type=file]::file-selector-button {
     padding: 2vh;
 }
 .dataTable{
-    background-color: rgb(255, 255, 255);
+    background-color: rgb(20, 20, 20,0.9);
     /* margin: 2vw; */
     /* backdrop-filter: blur(5px); */
     width: 45vw;
     height: 60vh;
-    color: black;
+    color: rgb(255, 255, 255);
     z-index: 1;
-    border: 1px solid #000000;
+    border: 1px solid #7c7c7c;
     /* margin-top: 7vh; */
 }
 .dataTable th, .dataTable td {
-    border: 1px solid #000000;
+    border: 1px solid #797979;
     padding: 3px;
     padding-left: 10px;
     padding-right: 10px;

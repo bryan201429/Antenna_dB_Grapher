@@ -116,7 +116,8 @@ export default function Home(){
         
         if(dataCSV){
             setHeaders(dataCSV[0]);
-            const rows = dataCSV.slice(1);
+            // const rows = dataCSV.slice(1);
+            const rows = dataCSV;
             const csvDataLong=rows.length;
             let temporal=0;
             let menor=0;
@@ -132,14 +133,14 @@ export default function Home(){
             let alt=[];
             
             for(let x=0;x<csvDataLong;x++){
-                pot[x]=parseInt(rows[x][0]);
+                pot[x]=parseFloat(rows[x][0]);
                 lat[x]=rows[x][1];
                 lon[x]=rows[x][2];
                 alt[x]=rows[x][3];
             }
-
-            let lat1 = -16.41750065976074; lat1 = lat1 * 3.1415926 / 180;
-            let lon1 = -71.54966328952415; lon1 = lon1 * 3.1415926 / 180;
+            
+            let lat1 = -16.426006833333332; lat1 = lat1 * 3.1415926 / 180;
+            let lon1 = -71.57327866666667; lon1 = lon1 * 3.1415926 / 180;
 
             for(let x=0;x<csvDataLong;x++){
                 let lat2=lat[x] * 3.1415926 / 180;
