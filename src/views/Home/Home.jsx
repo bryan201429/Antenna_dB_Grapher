@@ -102,14 +102,51 @@ export default function Home(){
             }
             return pot;
         });
-        
-        
-        
+ 
         // console.log('nuevos pots',pots,'distancias nuevas:',distPrediction);
         setDbPrediction(pots);
         // setPotDbScal(pots);
 
     }
+
+//     function toRadians(degrees) {
+//         return degrees * 180/ Math.PI  ;
+//       }
+      
+//       function toDegrees(radians) {
+//         return radians * 180 / Math.PI;
+//       }
+// // Función para calcular la distancia utilizando Haversine
+// function haversineDistance(lat1, lon1, lat2, lon2) {
+//     const R = 6371; // Radio de la Tierra en km
+//     const φ1 = toRadians(lat1);
+//     const φ2 = toRadians(lat2);
+//     const Δφ = toRadians(lat2 - lat1);
+//     const Δλ = toRadians(lon2 - lon1);
+  
+//     const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+//               Math.cos(φ1) * Math.cos(φ2) *
+//               Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+//     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+//     const distance = R * c; // Distancia en km
+  
+//     return distance;
+//   }
+
+// // Función para calcular el bearing (rumbo) entre dos puntos
+// function calculateBearing(lat1, lon1, lat2, lon2) {
+//     const φ1 = toRadians(lat1);
+//     const φ2 = toRadians(lat2);
+//     const Δλ = toRadians(lon2 - lon1);
+  
+//     const y = Math.sin(Δλ) * Math.cos(φ2);
+//     const x = Math.cos(φ1) * Math.sin(φ2) - Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ);
+//     const bearing = Math.atan2(y, x);
+  
+//     // Convertir el bearing a grados
+//     return (toDegrees(bearing) + 360) % 360;
+//   }
+
     //! ///////////////////////////////////////////////////////////////
 
     useEffect(()=>{
@@ -132,17 +169,20 @@ export default function Home(){
             let lon=[];
             let alt=[];
             
-            for(let x=0;x<csvDataLong;x++){
-                pot[x]=parseFloat(rows[x][0]);
-                lat[x]=rows[x][1];
-                lon[x]=rows[x][2];
-                alt[x]=rows[x][3];
+            for(let x=1;x<csvDataLong;x++){
+                console.log("Fila:", rows[x]);
+                pot[x-1]=parseFloat(rows[x][0]);
+                lat[x-1]=rows[x][1];
+                lon[x-1]=rows[x][2];
+                alt[x-1]=rows[x][3];
             }
             
-            let lat1 = -16.426006833333332; lat1 = lat1 * 3.1415926 / 180;
-            let lon1 = -71.57327866666667; lon1 = lon1 * 3.1415926 / 180;
+            let lat1 = -16.426006833333332; lat1 = lat1 * 3.1415926 / 180;          //Origen geográfico conocido de la señal
+            let lon1 = -71.57327866666667; lon1 = lon1 * 3.1415926 / 180;           //Origen geográfico conocido de la señal
 
-            for(let x=0;x<csvDataLong;x++){
+
+            for(let x=0;x<csvDataLong-1;x++){
+
                 let lat2=lat[x] * 3.1415926 / 180;
                 let lon2=lon[x] * 3.1415926 / 180;
                 
@@ -159,18 +199,20 @@ export default function Home(){
 
                 dist[x]=Base;
                 ang[x]=Bearing;
-                // console.log('------x es: ---', x);
-                // console.log('Potencia: ',pot[x]);
-                // console.log('Distancia: ',dist[x]);
-                // console.log('Bearing: ',ang[x]);
+                console.log('------x es: ---', x, 'Potencia: ',pot[x], 'Distancia: ',dist[x], 'Bearing: ',ang[x]);
+   
             }
+
+
+
+
             //! //////////// REDIMENSIONADO DE POTENCIA PARA GRAFICAR ///////////////////////
             
             let listadbscal = [];    //Guardará los valores de db escalados
 
             // let distmax=0;
 
-            for(let x=0;x<csvDataLong;x++){ //Hallar distancia más lejana
+            for(let x=0;x<csvDataLong-1;x++){ //Hallar distancia más lejana
                 if(dist[x]>maxDistance){
                     // distmax=dist[x];
                     setMaxDistance(dist[x]);
@@ -184,7 +226,7 @@ export default function Home(){
             //Potenciatx = Potrx + PathLoss
             setDbOriginal(pot);  //!Guardar la pot original sin escalar
 
-            for (let x = 0; x < csvDataLong; x++) {
+            for (let x = 0; x < csvDataLong-1; x++) {
                 if (dist[x] == maxDistance) {
                     listadbscal[x] = pot[x];
                 }
@@ -205,10 +247,11 @@ export default function Home(){
             menor=1000;
             let dbscaltemp=0;
             let disttemp=0;
-            let iter=0;
+ 
 
             for(let iter=0; iter<csvDataLong-1;iter++){ // Recorre el array incrementando el indice de inicio cada vez (el indice menor tiene el numero menor)
-                for(let x=iter;x<csvDataLong;x++){
+
+                for(let x=iter;x<csvDataLong-1;x++){
                     if(ang[x]<menor){
                         menor=ang[x];
                         menorpos=x;
