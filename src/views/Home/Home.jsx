@@ -15,6 +15,8 @@ export default function Home(){
     const [minPotForScale,setMinPotForScale]=useState(-20);
     const [maxDistance,setMaxDistance]=useState(0);
     const [distanceToScal,setDistanceToScal]=useState(0);
+    const c=2.99792458e8;
+    const [frequency,setFrequency]=useState(3e6);
     const [data,setData]=useState([
             {
                 type: 'scatterpolar',
@@ -85,67 +87,33 @@ export default function Home(){
 
          pots = pots.map((pot) => {
             let FSPL;
-            if (distPrediction > maxDistance) {
-                FSPL = 20 * Math.log10(Math.abs(distPrediction-maxDistance)) - 20 * Math.log10(3000000) - 20 * Math.log10(4 * Math.PI / 3e8);
-                console.log('FSPL MAYOR: ',20 * Math.log10(Math.abs(distPrediction-maxDistance)),' cte: ',20 * Math.log10(3000000) + 20 * Math.log10(4 * Math.PI / 3e8))
+            console.log('Calculando minimo:',Math.abs(distPrediction-maxDistance),'Bajo: ',(c/frequency)/(4 * Math.PI ))
+            if(Math.abs(distPrediction-maxDistance) < (c/frequency)/(4 * Math.PI )){
+                console.log('menor a fspl minimo')
+            }
+            else if (distPrediction > maxDistance) {
+
+                FSPL = 20 * Math.log10(Math.abs(distPrediction-maxDistance)) + 20 * Math.log10(frequency) + 20 * Math.log10(4 * Math.PI / c);
+                // console.log('FSPL MAYOR: ',20 * Math.log10(Math.abs(distPrediction-maxDistance)),' cte: ',20 * Math.log10(frequency) + 20 * Math.log10(4 * Math.PI / c))
                 // console.log('MAYOR', 'distPrediction>maxDistance: Pot=', pot, ' FSPL: ', FSPL, ' maxDistance: ', maxDistance, ' distPrediction: ', distPrediction,'potPredicted: ', pot-FSPL);
-                pot = pot - Math.abs(FSPL);
-                // pot = FSPL;
+                pot = pot - (FSPL);
                 
             } else if (distPrediction < maxDistance) {
-                FSPL = 20 * Math.log10(Math.abs(distPrediction-maxDistance)) + 20 * Math.log10(3000000) + 20 * Math.log10(4 * Math.PI / 3e8);
-                console.log('FSPL MENOR: ',20 * Math.log10(Math.abs(distPrediction-maxDistance)),' cte: ',20 * Math.log10(3000000) + 20 * Math.log10(4 * Math.PI / 3e8));
-                
+                FSPL = 20 * Math.log10(Math.abs(maxDistance-distPrediction)) + 20 * Math.log10(frequency) + 20 * Math.log10(4 * Math.PI / c);
+                // console.log('FSPL MENOR: ',20 * Math.log10(distPrediction/maxDistance),' cte: ',20 * Math.log10(frequency) + 20 * Math.log10(4 * Math.PI / c));
                 // console.log('MENOR', 'distPrediction<maxDistance: Pot=', pot, ' FSPL: ', FSPL, ' maxDistance: ', maxDistance, ' distPrediction: ', distPrediction,'potPredicted: ', pot+FSPL);
                 pot = pot + FSPL;
-                // pot = FSPL;
+
             }
             return pot;
         });
  
         // console.log('nuevos pots',pots,'distancias nuevas:',distPrediction);
         setDbPrediction(pots);
-        // setPotDbScal(pots);
+       
 
     }
 
-//     function toRadians(degrees) {
-//         return degrees * 180/ Math.PI  ;
-//       }
-      
-//       function toDegrees(radians) {
-//         return radians * 180 / Math.PI;
-//       }
-// // Función para calcular la distancia utilizando Haversine
-// function haversineDistance(lat1, lon1, lat2, lon2) {
-//     const R = 6371; // Radio de la Tierra en km
-//     const φ1 = toRadians(lat1);
-//     const φ2 = toRadians(lat2);
-//     const Δφ = toRadians(lat2 - lat1);
-//     const Δλ = toRadians(lon2 - lon1);
-  
-//     const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-//               Math.cos(φ1) * Math.cos(φ2) *
-//               Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-//     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-//     const distance = R * c; // Distancia en km
-  
-//     return distance;
-//   }
-
-// // Función para calcular el bearing (rumbo) entre dos puntos
-// function calculateBearing(lat1, lon1, lat2, lon2) {
-//     const φ1 = toRadians(lat1);
-//     const φ2 = toRadians(lat2);
-//     const Δλ = toRadians(lon2 - lon1);
-  
-//     const y = Math.sin(Δλ) * Math.cos(φ2);
-//     const x = Math.cos(φ1) * Math.sin(φ2) - Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ);
-//     const bearing = Math.atan2(y, x);
-  
-//     // Convertir el bearing a grados
-//     return (toDegrees(bearing) + 360) % 360;
-//   }
 
     //! ///////////////////////////////////////////////////////////////
 
@@ -153,7 +121,7 @@ export default function Home(){
         
         if(dataCSV){
             setHeaders(dataCSV[0]);
-            // const rows = dataCSV.slice(1);
+
             const rows = dataCSV;
             const csvDataLong=rows.length;
             let temporal=0;
@@ -177,14 +145,14 @@ export default function Home(){
                 alt[x-1]=rows[x][3];
             }
             
-            let lat1 = -16.426006833333332; lat1 = lat1 * 3.1415926 / 180;          //Origen geográfico conocido de la señal
-            let lon1 = -71.57327866666667; lon1 = lon1 * 3.1415926 / 180;           //Origen geográfico conocido de la señal
+            let lat1 = -16.426006833333332; lat1 = lat1 * Math.PI / 180;          //Origen geográfico conocido de la señal
+            let lon1 = -71.57327866666667; lon1 = lon1 * Math.PI / 180;           //Origen geográfico conocido de la señal
 
 
             for(let x=0;x<csvDataLong-1;x++){
 
-                let lat2=lat[x] * 3.1415926 / 180;
-                let lon2=lon[x] * 3.1415926 / 180;
+                let lat2=lat[x] * Math.PI / 180;
+                let lon2=lon[x] * Math.PI / 180;
                 
                 let dlon=lon2-lon1;
                 let dlat=lat2-lat1;
@@ -194,45 +162,43 @@ export default function Home(){
                 let c = 2 * Math.atan2(Math.sqrt(Math.abs(a)), Math.sqrt(1 - a));
                 let Base=6371*c*1000;
 
-                let Bearing = Math.atan2(Math.cos(lat1)*Math.sin(lat2)-Math.sin(lat1)*Math.cos(lat2)*Math.cos(lon2-lon1),Math.sin(lon2-lon1)*Math.cos(lat2));
+                let Bearing = Math.atan2(Math.cos(lat1)*Math.sin(lat2)-Math.sin(lat1)*Math.cos(lat2)*Math.cos(lon2-lon1),
+                Math.sin(lon2-lon1)*Math.cos(lat2));
+                
                 Bearing=((Bearing * 180 / Math.PI + 360) % 360);
 
-                dist[x]=Base;
+                dist[x]=Base;   
                 ang[x]=Bearing;
-                console.log('------x es: ---', x, 'Potencia: ',pot[x], 'Distancia: ',dist[x], 'Bearing: ',ang[x]);
-   
             }
-
-
 
 
             //! //////////// REDIMENSIONADO DE POTENCIA PARA GRAFICAR ///////////////////////
             
             let listadbscal = [];    //Guardará los valores de db escalados
-
-            // let distmax=0;
+            let listaDbOrig = pot;
+            let distmax=0;
 
             for(let x=0;x<csvDataLong-1;x++){ //Hallar distancia más lejana
-                if(dist[x]>maxDistance){
-                    // distmax=dist[x];
+                if(dist[x]>distmax){
+                    distmax=dist[x];
                     setMaxDistance(dist[x]);
                 }
             }
             
-            // setMaxDistance(1000);
-            console.log('La dist max es: ', maxDistance);
-            //Escalar los demás valores al de distancia máxima :
-            //Hallar potencia en transmisor :
-            //Potenciatx = Potrx + PathLoss
+
+            //Escalar los demás valores al de distancia máxima :Hallar potencia en transmisor :Potenciatx = Potrx + PathLoss
             setDbOriginal(pot);  //!Guardar la pot original sin escalar
 
             for (let x = 0; x < csvDataLong-1; x++) {
-                if (dist[x] == maxDistance) {
+                if (dist[x] == distmax) {
                     listadbscal[x] = pot[x];
                 }
-                else if (dist[x]<maxDistance) {
-                    // listadbscal[x] =  pot[x]+(20 * Math.log10(distmax))-(20*Math.log10(dist[x]));
-                    let FSPL=(20*Math.log10(maxDistance-dist[x]))+(20*Math.log10(300000))+(20*Math.log10(1.326e-8));
+                else if(Math.abs(distmax-dist[x]) < (c/frequency)/(4 * Math.PI )){
+                    console.log('menor a fspl minimo')
+                }
+
+                else if (dist[x]<distmax) {
+                    let FSPL=(20*Math.log10(Math.abs(distmax-dist[x])))+(20*Math.log10(300000))+(20*Math.log10(4 * Math.PI / 2.99792458e8));
                     listadbscal[x] =  pot[x]-FSPL;
                 }
             }		
@@ -244,38 +210,46 @@ export default function Home(){
 
         //! ///////////////////////// ORDENAR ARRAYS SEGUN ANGULOS DE FORMA ASCENDENTE /////////////////////////////////////
 
-            menor=1000;
-            let dbscaltemp=0;
-            let disttemp=0;
- 
+            menor = 1000;
+            let dbScalTemp = 0;
+            let distTemp = 0;
+            let potTemp = 0;
 
-            for(let iter=0; iter<csvDataLong-1;iter++){ // Recorre el array incrementando el indice de inicio cada vez (el indice menor tiene el numero menor)
+            for(let j=0; j<csvDataLong-1;j++){ // Recorre el array incrementando el indice de inicio cada vez (el indice menor tiene el numero menor)
 
-                for(let x=iter;x<csvDataLong-1;x++){
-                    if(ang[x]<menor){
-                        menor=ang[x];
-                        menorpos=x;
+                for(let i=j;i<csvDataLong-1;i++){
+                    if(ang[i]<menor){
+                        menor=ang[i];
+                        menorpos=i;
                     }    
                 }
-                temporal=ang[iter];
-                ang[iter]=menor;        // Se asigna el valor menor a la posicion 0 del array
+                temporal=ang[j];
+                ang[j]=menor;        // Se asigna el valor menor a la posicion 0 del array
                 ang[menorpos]=temporal; //Se intercambia el menor valor 
 
-                dbscaltemp = listadbscal[iter];
-                listadbscal[iter] = listadbscal[menorpos];
-                listadbscal[menorpos] = dbscaltemp;
+                dbScalTemp = listadbscal[j];
+                listadbscal[j] = listadbscal[menorpos];
+                listadbscal[menorpos] = dbScalTemp;
 
-                disttemp = dist[iter];
-                dist[iter] = dist[menorpos];
-                dist[menorpos] = disttemp;
+                distTemp = dist[j];
+                dist[j] = dist[menorpos];
+                dist[menorpos] = distTemp;
+
+                potTemp = listaDbOrig[j];
+                listaDbOrig[j] = listaDbOrig[menorpos];
+                listaDbOrig[menorpos] = potTemp;
+
                 menor = 1000;
             }
             console.log('Angulos ordenados: ',ang);
             console.log('Lista dist:',dist);
             console.log('Lista db escalados',listadbscal);
+            console.log('Lista db origin',listadbscal);
             setTheta(ang);
             setPotDbScal(listadbscal);
             setDistances(dist);
+            setDbOriginal(listaDbOrig); 
+
             setMaxPotForScale(Math.max(...listadbscal));
             setMinPotForScale(Math.min(...listadbscal));
 
@@ -291,7 +265,7 @@ export default function Home(){
             ];
             setData(datagraph);
         }
-    },[dataCSV,maxDistance])
+    },[dataCSV])
 
 
 
@@ -322,16 +296,26 @@ export default function Home(){
                 <thead>
                     <th>Sample</th>
                     <th>Theta</th>
-                    <th>Pot</th>
-                    <th>DistScal</th>
-                    <th>PotOriginal</th>
-                    <th>DistOriginal</th>
+                    <th>Dist. Original</th>
+                    <th>Dist. Escalada</th>
+                    <th>Pot. Original</th>
+                    <th>Potencia Escalada</th>
                     <th>PotPredicted</th>
 
                 </thead>
                 <tbody> 
                     {theta&&theta.map((column,i)=>{
-                        return <tr> <td>{i}</td><td>{theta[i]}</td> <td>{potDbScal[i]}</td> <td>{maxDistance}</td> <td>{dbOriginal[i]}</td> <td>{distances[i]}</td><td>{dbPrediction[i]}</td> </tr>
+                        return( 
+                        <tr> 
+                            <td>{i}</td>
+                            <td>{theta[i]}</td> 
+                            <td>{distances[i]}</td> 
+                            <td>{maxDistance}</td> 
+                            <td>{dbOriginal[i]}</td> 
+                            <td>{potDbScal[i]}</td> 
+                            <td>{dbPrediction[i]}</td> 
+                        </tr>
+                        )
                     })}
 
                 </tbody>
