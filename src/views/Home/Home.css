@@ -6,6 +6,18 @@ align-items: center;
 justify-content: start;   
 min-height: 100vh; 
 }
+#title{
+    background-color: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(5px);
+    width: 100%;
+    height: 50px;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-content: flex-start;
+    font-size: xx-large;
+}
 #HomeContainer{
     width: 100vw;
     background-color: rgba(0, 0, 0,0);
@@ -18,9 +30,9 @@ min-height: 100vh;
 }
 .inputFile{
     position:relative;
-    margin-top: 5vh;
+    /* margin-top: 5vh; */
     margin-left: 0;
-    /* background-color: blue; */
+
 }
 input[type=file]::file-selector-button {
     margin-right: 20px;
@@ -37,21 +49,31 @@ input[type=file]::file-selector-button {
     background: #0d45a5;
   }
   
-.ChartContainer{
+.FirstRowContainer{
 
     margin-bottom: 2vw;
     /* width: fit-content; */
     padding: 1vw;
     /* padding-top: 5vw; */
     /* height: fit-content;  */
-    background-color: rgba(255, 255, 255, 0.5);
-    backdrop-filter: blur(1px);
+    background-color: rgba(80, 80, 80, 0.8);
+    backdrop-filter: blur(5px);
     border-radius: 10px;
-    width: 40vw;
-    height:40vw;
+    width: 95vw;
+    height:38vw;
     display: flex;
     align-items: start;
-    justify-content: center;
+    justify-content: space-evenly;
+}
+.optionsCointainer{
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    align-items:flex-start;
+    width: 90%;
+    height: 100%;
+    margin-right: 2%;
+    /* background-color: red; */
 }
 .plotChart{
     width: 100%;
@@ -59,6 +81,42 @@ input[type=file]::file-selector-button {
     /* border-radius: 10px; */
     /* padding: 0; */
     /* margin-top: 1vw; */
+}
+.uploader1{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding-bottom: 10px;
+    padding-top: 5px;
+    border-bottom: solid 1px;
+}
+.propagationBox{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+    padding-top: 5px;
+    padding-bottom: 10px;
+    border-bottom: solid 1px;
+}
+.predictionBox{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding-top: 5px;
+    padding-bottom: 10px;
+    border-bottom: solid 1px;
+}
+.selectModelPropagation{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
 }
 .tableContainer{
     width: fit-content;

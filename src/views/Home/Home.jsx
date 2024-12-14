@@ -15,6 +15,9 @@ export default function Home(){
     const [minPotForScale,setMinPotForScale]=useState(-20);
     const [maxDistance,setMaxDistance]=useState(0);
     const [distanceToScal,setDistanceToScal]=useState(0);
+    const [selectedModel,setSelectedModel]=useState(0);
+    const [okumuraSettingsVisibility,setOkumuraSettingsVisibility]=useState(false); //Visibilidad de ajustes para Modelo Okumura
+
     const c=2.99792458e8;
     const [frequency,setFrequency]=useState(3e6);
     const [data,setData]=useState([
@@ -74,12 +77,9 @@ export default function Home(){
     }
     //! /////////////////////////// Predicción //////////////////
     const handlePredictionClick=()=>{                               
-        // console.log('los ang:',theta);
+
         let angs=theta;
-        // console.log('potsScaled',potDbScal);
         let pots=potDbScal;
-        // let dist=distances;
-        // let dist=maxDistance;
         let distPrediction=distanceToScal;
         // pots=pots.map(el=>{return el+10})
         
@@ -88,22 +88,38 @@ export default function Home(){
          pots = pots.map((pot) => {
             let FSPL;
             console.log('Calculando minimo:',Math.abs(distPrediction-maxDistance),'Bajo: ',(c/frequency)/(4 * Math.PI ))
-            if(Math.abs(distPrediction-maxDistance) < (c/frequency)/(4 * Math.PI )){
-                console.log('menor a fspl minimo')
+
+            if(selectedModel===0){
+                if(Math.abs(distPrediction-maxDistance) < (c/frequency)/(4 * Math.PI )){
+                    pot=pot;
+                }
+                else if (distPrediction > maxDistance) {
+                    FSPL = 20 * Math.log10(Math.abs(distPrediction-maxDistance)) + 20 * Math.log10(frequency) + 20 * Math.log10(4 * Math.PI / c);
+                    // console.log('FSPL MAYOR: ',20 * Math.log10(Math.abs(distPrediction-maxDistance)),' cte: ',20 * Math.log10(frequency) + 20 * Math.log10(4 * Math.PI / c))
+                    // console.log('MAYOR', 'distPrediction>maxDistance: Pot=', pot, ' FSPL: ', FSPL, ' maxDistance: ', maxDistance, ' distPrediction: ', distPrediction,'potPredicted: ', pot-FSPL);
+                    pot = pot - (FSPL);
+                } else if (distPrediction < maxDistance) {
+                    FSPL = 20 * Math.log10(Math.abs(maxDistance-distPrediction)) + 20 * Math.log10(frequency) + 20 * Math.log10(4 * Math.PI / c);
+                    // console.log('FSPL MENOR: ',20 * Math.log10(distPrediction/maxDistance),' cte: ',20 * Math.log10(frequency) + 20 * Math.log10(4 * Math.PI / c));
+                    // console.log('MENOR', 'distPrediction<maxDistance: Pot=', pot, ' FSPL: ', FSPL, ' maxDistance: ', maxDistance, ' distPrediction: ', distPrediction,'potPredicted: ', pot+FSPL);
+                    pot = pot + FSPL;
+                }
             }
-            else if (distPrediction > maxDistance) {
-
-                FSPL = 20 * Math.log10(Math.abs(distPrediction-maxDistance)) + 20 * Math.log10(frequency) + 20 * Math.log10(4 * Math.PI / c);
-                // console.log('FSPL MAYOR: ',20 * Math.log10(Math.abs(distPrediction-maxDistance)),' cte: ',20 * Math.log10(frequency) + 20 * Math.log10(4 * Math.PI / c))
-                // console.log('MAYOR', 'distPrediction>maxDistance: Pot=', pot, ' FSPL: ', FSPL, ' maxDistance: ', maxDistance, ' distPrediction: ', distPrediction,'potPredicted: ', pot-FSPL);
-                pot = pot - (FSPL);
-                
-            } else if (distPrediction < maxDistance) {
-                FSPL = 20 * Math.log10(Math.abs(maxDistance-distPrediction)) + 20 * Math.log10(frequency) + 20 * Math.log10(4 * Math.PI / c);
-                // console.log('FSPL MENOR: ',20 * Math.log10(distPrediction/maxDistance),' cte: ',20 * Math.log10(frequency) + 20 * Math.log10(4 * Math.PI / c));
-                // console.log('MENOR', 'distPrediction<maxDistance: Pot=', pot, ' FSPL: ', FSPL, ' maxDistance: ', maxDistance, ' distPrediction: ', distPrediction,'potPredicted: ', pot+FSPL);
-                pot = pot + FSPL;
-
+            else if(selectedModel===1){
+                if(Math.abs(distPrediction-maxDistance) < (c/frequency)/(4 * Math.PI )){
+                    pot=pot;
+                }
+                else if (distPrediction > maxDistance) {
+                    FSPL = 20 * Math.log10(Math.abs(distPrediction-maxDistance)) + 20 * Math.log10(frequency) + 20 * Math.log10(4 * Math.PI / c);
+                    // console.log('FSPL MAYOR: ',20 * Math.log10(Math.abs(distPrediction-maxDistance)),' cte: ',20 * Math.log10(frequency) + 20 * Math.log10(4 * Math.PI / c))
+                    // console.log('MAYOR', 'distPrediction>maxDistance: Pot=', pot, ' FSPL: ', FSPL, ' maxDistance: ', maxDistance, ' distPrediction: ', distPrediction,'potPredicted: ', pot-FSPL);
+                    pot = pot;
+                } else if (distPrediction < maxDistance) {
+                    FSPL = 20 * Math.log10(Math.abs(maxDistance-distPrediction)) + 20 * Math.log10(frequency) + 20 * Math.log10(4 * Math.PI / c);
+                    // console.log('FSPL MENOR: ',20 * Math.log10(distPrediction/maxDistance),' cte: ',20 * Math.log10(frequency) + 20 * Math.log10(4 * Math.PI / c));
+                    // console.log('MENOR', 'distPrediction<maxDistance: Pot=', pot, ' FSPL: ', FSPL, ' maxDistance: ', maxDistance, ' distPrediction: ', distPrediction,'potPredicted: ', pot+FSPL);
+                    pot = pot;
+                }
             }
             return pot;
         });
@@ -130,7 +146,6 @@ export default function Home(){
 
             let dist=[];
             let ang=[];
-            let angInt=[];
 
             let pot=[];
             let lat=[];
@@ -148,7 +163,7 @@ export default function Home(){
             let lat1 = -16.426006833333332; lat1 = lat1 * Math.PI / 180;          //Origen geográfico conocido de la señal
             let lon1 = -71.57327866666667; lon1 = lon1 * Math.PI / 180;           //Origen geográfico conocido de la señal
 
-
+        //! //////////// CONVERSION DE LAT Y LONG A DIST, ANG ///////////////////////
             for(let x=0;x<csvDataLong-1;x++){
 
                 let lat2=lat[x] * Math.PI / 180;
@@ -186,22 +201,33 @@ export default function Home(){
             }
             
 
-            //Escalar los demás valores al de distancia máxima :Hallar potencia en transmisor :Potenciatx = Potrx + PathLoss
-            setDbOriginal(pot);  //!Guardar la pot original sin escalar
+            //! Escalar los demás valores al de distancia máxima :Hallar potencia en transmisor :Potenciatx = Potrx + PathLoss
+            setDbOriginal(pot);  //Guardar la pot original sin escalar
 
-            for (let x = 0; x < csvDataLong-1; x++) {
-                if (dist[x] == distmax) {
-                    listadbscal[x] = pot[x];
-                }
-                else if(Math.abs(distmax-dist[x]) < (c/frequency)/(4 * Math.PI )){
-                    console.log('menor a fspl minimo')
-                }
+            if(selectedModel===0){
+                for (let x = 0; x < csvDataLong-1; x++) {
+                    if (dist[x] == distmax) {
+                        listadbscal[x] = pot[x];
+                    }
+                    else if(Math.abs(distmax-dist[x]) < (c/frequency)/(4 * Math.PI )){
+                         listadbscal[x] = pot[x];
+                    }
+                    else if (dist[x]<distmax) {
+                        let FSPL=(20*Math.log10(Math.abs(distmax-dist[x])))+(20*Math.log10(frequency))+(20*Math.log10(4 * Math.PI / c));
+                        listadbscal[x] =  pot[x]-FSPL;
+                    }
+                }		
+            }
+            else if(selectedModel===1){
+                for (let x = 0; x < csvDataLong-1; x++) {
 
-                else if (dist[x]<distmax) {
-                    let FSPL=(20*Math.log10(Math.abs(distmax-dist[x])))+(20*Math.log10(300000))+(20*Math.log10(4 * Math.PI / 2.99792458e8));
-                    listadbscal[x] =  pot[x]-FSPL;
-                }
-            }		
+                    // let L=(69.55 + 26.16*(20*Math.log10(frequency)) - 13.82*Math.log10(hb) - ahm + [44.9-6.55*Math.log10(hb)]*Math.log10(Math.abs(distmax-dist[x])));
+                    // listadbscal[x] = pot[x] - L ;
+                    listadbscal[x] = pot[x] ;
+
+                }		
+            }
+            
            
             // console.log('Lista dist PREV:',dist);
             // console.log('Lista db PREV',pot);
@@ -265,22 +291,104 @@ export default function Home(){
             ];
             setData(datagraph);
         }
-    },[dataCSV])
+    },[dataCSV,selectedModel])
 
 
 
-
+useEffect(()=>{
+    console.log(selectedModel)
+    if(selectedModel==1){
+        setOkumuraSettingsVisibility(true);
+    }
+    else{
+        setOkumuraSettingsVisibility(false);
+    } 
+},[selectedModel])
 
     return(
         <div id='Home'>
             <div id='title'>
-        <h1>Graficador polar de diagrama de radiación</h1>
+        Graficador polar de diagrama de radiación
             </div>
         
         <div id='HomeContainer'>
             
-            <div className='ChartContainer'>
+            <div className='FirstRowContainer'>
                
+
+                <div className='optionsCointainer'>
+                    <div className='uploader1'>
+                        <h3>Subir CSV para analisis</h3>
+                        <input type='file' name ='file' accept='.csv' onChange={handleFileChange} className='inputFile'></input>    
+                    </div>
+                    <div className='propagationBox'>
+                        <h3>Modelo de propagación</h3>
+                        <div className='selectModelPropagation'>
+                            <h4>Seleccione un modelo de propagación: </h4>
+                            <div>
+                                <label>
+                                    <input type="radio" name="opcion" value="1" onChange={() => {setSelectedModel(0); handlePredictionClick}} checked={selectedModel === 0}/>
+                                    FSPL
+                                </label>
+                                <label>
+                                    <input type="radio" name="opcion" value="2" onChange={() => {setSelectedModel(1); handlePredictionClick}} checked={selectedModel === 1}/>
+                                    Okumura-Hata
+                                </label>
+                            </div>
+                         </div>
+                        {okumuraSettingsVisibility && <div>
+                            <label>
+                                Altura de la antena transmisora en metros: 
+                                <input/>
+                            </label>
+                            <label>
+                                Altura de la antena receptora en metros: 
+                                <input/>
+                            </label>
+                            <div>
+                                Seleccionar tamaño de ciudad:
+                                <div>
+                                    <label>
+                                        <input type="radio" name="ciudad" value="1" onChange={() => {setSelectedModel(0); handlePredictionClick}} checked={selectedModel === 0}/>
+                                        Pequeña / mediana
+                                        </label>
+                                    <label>
+                                        <input type="radio" name="ciudad" value="2" onChange={() => {setSelectedModel(1); handlePredictionClick}} checked={selectedModel === 1}/>
+                                        Grande
+                                    </label>
+                                </div>
+                            
+                            </div>
+                                
+                            <div>
+                                Tipo de área:
+                                <div>
+                                    <label>
+                                        <input type="radio" name="ciudad" value="1" onChange={() => {setSelectedModel(0); handlePredictionClick}} checked={selectedModel === 0}/>
+                                        Suburbana
+                                        </label>
+                                    <label>
+                                        <input type="radio" name="ciudad" value="2" onChange={() => {setSelectedModel(1); handlePredictionClick}} checked={selectedModel === 1}/>
+                                        Rural
+                                    </label>
+                                </div>
+                            
+                            </div>
+                            
+                        </div>}
+                    </div>
+                    <div className='predictionBox'>
+                        <h3>Predicción</h3>
+                        <div>
+                            <label>Ingrese una distancia de estimación (m):</label>
+                            <input type='range' name='distancia' min={0} max='300' step='0.5' onChange={handleSliderChange} id='slideInput'></input>
+                            <input type='textbox' id='inputTextBox' min={0} max='300' onChange={handleTextBoxChange}></input>
+                            <button id='predictionButton' onClick={handlePredictionClick}>Prediction</button>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
                 <Plot
                     data={data}
                     layout={layout}
@@ -291,43 +399,39 @@ export default function Home(){
             </div>
             
 
-        <div className='tableContainer'>
-            <table className='dataTable'>
-                <thead>
-                    <th>Sample</th>
-                    <th>Theta</th>
-                    <th>Dist. Original</th>
-                    <th>Dist. Escalada</th>
-                    <th>Pot. Original</th>
-                    <th>Potencia Escalada</th>
-                    <th>PotPredicted</th>
+                <div className='tableContainer'>
+                    <table className='dataTable'>
+                        <thead>
+                            <th>Sample</th>
+                            <th>Theta</th>
+                            <th>Dist. Original</th>
+                            <th>Dist. Escalada</th>
+                            <th>Pot. Original</th>
+                            <th>Potencia Escalada</th>
+                            <th>PotPredicted</th>
 
-                </thead>
-                <tbody> 
-                    {theta&&theta.map((column,i)=>{
-                        return( 
-                        <tr> 
-                            <td>{i}</td>
-                            <td>{theta[i]}</td> 
-                            <td>{distances[i]}</td> 
-                            <td>{maxDistance}</td> 
-                            <td>{dbOriginal[i]}</td> 
-                            <td>{potDbScal[i]}</td> 
-                            <td>{dbPrediction[i]}</td> 
-                        </tr>
-                        )
-                    })}
+                        </thead>
+                        <tbody> 
+                            {theta&&theta.map((column,i)=>{
+                                return( 
+                                <tr> 
+                                    <td>{i}</td>
+                                    <td>{theta[i]}</td> 
+                                    <td>{distances[i]}</td> 
+                                    <td>{maxDistance}</td> 
+                                    <td>{dbOriginal[i]}</td> 
+                                    <td>{potDbScal[i]}</td> 
+                                    <td>{dbPrediction[i]}</td> 
+                                </tr>
+                                )
+                            })}
 
-                </tbody>
-            </table>
-    
-            </div>
+                        </tbody>
+                    </table>
+        
+                </div>
                </div>
-               <input type='file' accept='.csv' onChange={handleFileChange} className='inputFile'></input>
-               
-               <input type='range' name='distancia' min={0} max='300' step='0.5' onChange={handleSliderChange} id='slideInput'></input>
-               <input type='textbox' id='inputTextBox' min={0} max='300' onChange={handleTextBoxChange}></input>
-               <button id='predictionButton' onClick={handlePredictionClick}>Prediction</button>
+
         </div>
     )
 }
