@@ -417,7 +417,7 @@ useEffect(()=>{
                                         </label>
                                     <label>
                                         <input type="radio" name="tipoArea" onClick={() => areaTypeChange(2)} checked={okumuraValueInputs.areaType == 2}/>
-                                        Rural / Abierta
+                                        Rural / Abiertaa
                                     </label>
                                 </div>
                             
