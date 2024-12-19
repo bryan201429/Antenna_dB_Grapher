@@ -107,8 +107,25 @@ export default function Home(){
         }
 
 
-    
-        useEffect(()=>{
+        const handleApply = () => {
+            console.log({okumuraValidInputs});
+            let validOkumuraFlag=true;
+            if(okumuraValueInputs.txHeight==undefined){
+                okumuraValidInputs.txHeight=false;
+                validOkumuraFlag=false;
+            }
+            if(okumuraValueInputs.rxHeight==undefined){
+                okumuraValidInputs.rxHeight=false;
+                validOkumuraFlag=false;
+            }
+            if(okumuraValueInputs.citySize==undefined){
+                okumuraValidInputs.citySize=false;
+                validOkumuraFlag=false;
+            }
+        }
+        
+
+useEffect(()=>{
             console.log({okumuraValueInputs})
         },[okumuraValueInputs])
 
@@ -422,7 +439,7 @@ useEffect(()=>{
                                 </div>
                             
                             </div>
-                            <button className='applyOkumuraButton'> Aplicar Modelo</button>
+                            <button className='applyOkumuraButton' onClick={handleApply}> Aplicar Modelo</button>
                         </div>}
                     </div>
                     <div className='predictionBox'>
