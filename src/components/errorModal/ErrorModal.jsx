@@ -1,11 +1,12 @@
 import './ErrorModal.css'
 
-export default function ErrorModal(){
+export default function ErrorModal({ errorFlag, setErrorFlag }){
 
 return(
 <div id='errorModalContainer'>
-    <div>
-        
+    <div id='errorBox'>
+        Verificar los datos del modelo de Okumura
+        <button onClick={()=>{setErrorFlag(false)}}>Cerrar</button>
     </div>
 </div>
 

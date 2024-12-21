@@ -2,6 +2,7 @@ import './Home.css'
 import { useEffect, useState } from 'react';
 import React from 'react';
 import Plot from 'react-plotly.js';
+import ErrorModal from '../../components/errorModal/ErrorModal'
 
 export default function Home(){
     const [dataCSV,setDataCSV]=useState(); 
@@ -19,6 +20,9 @@ export default function Home(){
     const [okumuraSettingsVisibility,setOkumuraSettingsVisibility]=useState(false); //Visibilidad de ajustes para Modelo Okumura
     const [okumuraValidInputs,setOkumuraValidInputs] = useState({txHeight: true, rxHeight: true, citySize:true, areaType:true})
     const [okumuraValueInputs,setOkumuraValueInputs] = useState({txHeight: undefined, rxHeight: undefined, citySize:undefined, areaType:undefined})
+    const [okumuraErrorFlag,SetokumuraErrorFlag ]= useState(false);
+    const [okumuraReady,SetOkumuraReady ]= useState(false);
+
     const c=2.99792458e8;
     const [frequency,setFrequency]=useState(3e6);
     const [data,setData]=useState([
@@ -71,9 +75,12 @@ export default function Home(){
         slideInput.value=e.target.value
         setDistanceToScal(e.target.value);   
     }
-    //! ///////////////////// OKUMURA INPUTS ////////////////////
+
+
+    //! ///////////////////// OKUMURA INPUTS ////////////////////////////////////////////
 
         const txAntennaChange = (e)=>{
+            SetOkumuraReady(false);
             let txAntennaValue=Number(e.target.value)
             if(txAntennaValue<30 || txAntennaValue>200){
                 setOkumuraValidInputs((prev)=>({...prev, txHeight:false}))
@@ -85,6 +92,7 @@ export default function Home(){
             }
         }
         const rxAntennaChange = (e)=>{
+            SetOkumuraReady(false);
             let rxAntennaValue=Number(e.target.value)
             if(rxAntennaValue<1 || rxAntennaValue>10){
                 setOkumuraValidInputs((prev)=>({...prev, rxHeight:false}))
@@ -97,80 +105,82 @@ export default function Home(){
         }
 
         const citySizeChange = (option)=>{
+            SetOkumuraReady(false);
             setOkumuraValidInputs((prev)=>({...prev, citySize:true}))
             setOkumuraValueInputs((prev)=>({...prev, citySize:option}))
         }
         const areaTypeChange = (option)=>{
+            SetOkumuraReady(false);
             setOkumuraValidInputs((prev)=>({...prev, areaType:true}))
-                console.log('option de areatyyoe:',option)
             setOkumuraValueInputs((prev)=>({...prev, areaType: prev.areaType == option ? undefined : option,}))
         }
 
 
         const handleApply = () => {
-            console.log({okumuraValidInputs});
+            // console.log('Apply button:',{okumuraValueInputs},{okumuraValidInputs})
+            SetOkumuraReady(false);
             let validOkumuraFlag=true;
-            if(okumuraValueInputs.txHeight==undefined){
-                okumuraValidInputs.txHeight=false;
+
+            if(okumuraValueInputs.txHeight==undefined ||okumuraValidInputs.txHeight==false){
                 validOkumuraFlag=false;
             }
-            if(okumuraValueInputs.rxHeight==undefined){
-                okumuraValidInputs.rxHeight=false;
+            if(okumuraValueInputs.rxHeight==undefined ||okumuraValidInputs.rxHeight==false ){
                 validOkumuraFlag=false;
             }
-            if(okumuraValueInputs.citySize==undefined){
-                okumuraValidInputs.citySize=false;
+            if(okumuraValueInputs.citySize==undefined ||okumuraValidInputs.citySize==false){
                 validOkumuraFlag=false;
+            }
+            if(validOkumuraFlag == false){
+                SetokumuraErrorFlag(true);  //Mostrar errorModal
+            }
+            else if(validOkumuraFlag == true){
+                SetOkumuraReady(true);
             }
         }
         
 
-useEffect(()=>{
+        useEffect(()=>{
             console.log({okumuraValueInputs})
-        },[okumuraValueInputs])
+            console.log({okumuraReady})
+        },[okumuraReady])
 
-    //! /////////////////////////// Predicción //////////////////
+
+    //! /////////////////////////// Predicción /////////////////////////////////////////////////
     const handlePredictionClick=()=>{                               
 
         let angs=theta;
         let pots=potDbScal;
-        let distPrediction=distanceToScal;
-        // pots=pots.map(el=>{return el+10})
-        
-         let FSPL=0;
+        let distPrediction=distanceToScal;    
+        let FSPL=0;
 
          pots = pots.map((pot) => {
             let FSPL;
-            console.log('Calculando minimo:',Math.abs(distPrediction-maxDistance),'Bajo: ',(c/frequency)/(4 * Math.PI ))
+            // console.log('Calculando minimo:',Math.abs(distPrediction-maxDistance),'Bajo: ',(c/frequency)/(4 * Math.PI ))
 
-            if(selectedModel===0){
+            if(selectedModel===0){          //!FSPL
                 if(Math.abs(distPrediction-maxDistance) < (c/frequency)/(4 * Math.PI )){
                     pot=pot;
                 }
                 else if (distPrediction > maxDistance) {
                     FSPL = 20 * Math.log10(Math.abs(distPrediction-maxDistance)) + 20 * Math.log10(frequency) + 20 * Math.log10(4 * Math.PI / c);
-                    // console.log('FSPL MAYOR: ',20 * Math.log10(Math.abs(distPrediction-maxDistance)),' cte: ',20 * Math.log10(frequency) + 20 * Math.log10(4 * Math.PI / c))
                     // console.log('MAYOR', 'distPrediction>maxDistance: Pot=', pot, ' FSPL: ', FSPL, ' maxDistance: ', maxDistance, ' distPrediction: ', distPrediction,'potPredicted: ', pot-FSPL);
                     pot = pot - (FSPL);
                 } else if (distPrediction < maxDistance) {
                     FSPL = 20 * Math.log10(Math.abs(maxDistance-distPrediction)) + 20 * Math.log10(frequency) + 20 * Math.log10(4 * Math.PI / c);
-                    // console.log('FSPL MENOR: ',20 * Math.log10(distPrediction/maxDistance),' cte: ',20 * Math.log10(frequency) + 20 * Math.log10(4 * Math.PI / c));
                     // console.log('MENOR', 'distPrediction<maxDistance: Pot=', pot, ' FSPL: ', FSPL, ' maxDistance: ', maxDistance, ' distPrediction: ', distPrediction,'potPredicted: ', pot+FSPL);
                     pot = pot + FSPL;
                 }
             }
-            else if(selectedModel===1){
+            else if(selectedModel===1){     //!OKUMURA
                 if(Math.abs(distPrediction-maxDistance) < (c/frequency)/(4 * Math.PI )){
                     pot=pot;
                 }
                 else if (distPrediction > maxDistance) {
                     FSPL = 20 * Math.log10(Math.abs(distPrediction-maxDistance)) + 20 * Math.log10(frequency) + 20 * Math.log10(4 * Math.PI / c);
-                    // console.log('FSPL MAYOR: ',20 * Math.log10(Math.abs(distPrediction-maxDistance)),' cte: ',20 * Math.log10(frequency) + 20 * Math.log10(4 * Math.PI / c))
                     // console.log('MAYOR', 'distPrediction>maxDistance: Pot=', pot, ' FSPL: ', FSPL, ' maxDistance: ', maxDistance, ' distPrediction: ', distPrediction,'potPredicted: ', pot-FSPL);
                     pot = pot;
                 } else if (distPrediction < maxDistance) {
                     FSPL = 20 * Math.log10(Math.abs(maxDistance-distPrediction)) + 20 * Math.log10(frequency) + 20 * Math.log10(4 * Math.PI / c);
-                    // console.log('FSPL MENOR: ',20 * Math.log10(distPrediction/maxDistance),' cte: ',20 * Math.log10(frequency) + 20 * Math.log10(4 * Math.PI / c));
                     // console.log('MENOR', 'distPrediction<maxDistance: Pot=', pot, ' FSPL: ', FSPL, ' maxDistance: ', maxDistance, ' distPrediction: ', distPrediction,'potPredicted: ', pot+FSPL);
                     pot = pot;
                 }
@@ -206,7 +216,7 @@ useEffect(()=>{
             let freq=[];
             
             for(let x=1;x<csvDataLong;x++){
-                console.log("Fila:", rows[x]);
+                // console.log("Fila:", rows[x]);
                 pot[x-1]=parseFloat(rows[x][0]);
                 lat[x-1]=rows[x][1];
                 lon[x-1]=rows[x][2];
@@ -277,13 +287,41 @@ useEffect(()=>{
                 }		
             }
             else if(selectedModel===1){
-                for (let x = 0; x < csvDataLong-1; x++) {
+                if(okumuraReady==true){
+                    for (let x = 0; x < csvDataLong-1; x++) {
+                        let ahm=0;
+                        let K=0;                            // Factor de corrección según área
+                        if(okumuraValueInputs.citySize==1){ // ciudad pequeña,mediana
+                            ahm=(1.1*Math.log10(frequency)-0.7)*okumuraValueInputs.rxHeight-(1.56*Math.log10(frequency)-0.8)
+                        }
+                        else if(okumuraValueInputs.citySize==2){ // ciudad grande
+                            if(frequency<=300){
+                                ahm=8.29*(Math.log10(1.54*okumuraValueInputs.rxHeight))^2 - 1.1     // Menor a 300 MHz
+                            }
+                            if(frequency>300){
+                                ahm=3.2*(Math.log10(11.75*okumuraValueInputs.rxHeight))^2 - 4.97    // Mayor a 300 MHz
+                            }
+                        }
 
-                    // let L=(69.55 + 26.16*(20*Math.log10(frequency)) - 13.82*Math.log10(hb) - ahm + [44.9-6.55*Math.log10(hb)]*Math.log10(Math.abs(distmax-dist[x])));
-                    // listadbscal[x] = pot[x] - L ;
-                    listadbscal[x] = pot[x] ;
+                        let L=(69.55 + 26.16*(20*Math.log10(frequency)) - 13.82*Math.log10(okumuraValueInputs.txHeight) - ahm + [44.9-6.55*Math.log10(okumuraValueInputs.txHeight)]*Math.log10(Math.abs(distmax-dist[x])));
 
-                }		
+                        if(okumuraValueInputs.areaType!==undefined){
+                            if(okumuraValueInputs.areaType==1){
+                                K=2*Math.log10(frequency/28)^2+5.4
+                            }
+                            else if(okumuraValueInputs.areaType==2){
+                                K=4.78*Math.log10(frequency)^2 - 18.3*Math.log10(frequency)+40.94
+                            }
+                        }
+                        listadbscal[x] = pot[x] - L -K ;
+                        // listadbscal[x] = pot[x] ;
+                    }		
+                    console.log('Ejecutando okumura con:', okumuraValueInputs)
+
+                }
+                else{
+                    console.log('Okumura invalido')
+                }
             }
             
            
@@ -325,10 +363,10 @@ useEffect(()=>{
 
                 menor = 1000;
             }
-            console.log('Angulos ordenados: ',ang);
-            console.log('Lista dist:',dist);
-            console.log('Lista db escalados',listadbscal);
-            console.log('Lista db origin',listadbscal);
+            // console.log('Angulos ordenados: ',ang);
+            // console.log('Lista dist:',dist);
+            // console.log('Lista db escalados',listadbscal);
+            // console.log('Lista db origin',listadbscal);
             setTheta(ang);
             setPotDbScal(listadbscal);
             setDistances(dist);
@@ -349,12 +387,11 @@ useEffect(()=>{
             ];
             setData(datagraph);
         }
-    },[dataCSV,selectedModel])
+    },[dataCSV,selectedModel,okumuraReady])
 
 
 
 useEffect(()=>{
-    console.log(selectedModel)
     if(selectedModel==1){
         setOkumuraSettingsVisibility(true);
     }
@@ -381,7 +418,7 @@ useEffect(()=>{
                     </div>
                     <div className='freqContainer'>
                         <h3>Frecuencia detectada: </h3>
-                        <h3>{`${frequency} Hz`}</h3>
+                        <h3>{`${frequency} MHz`}</h3>
                     </div>
                     <div className='propagationBox'>
                         <h3>Modelo de propagación</h3>
@@ -496,7 +533,7 @@ useEffect(()=>{
         
                 </div>
                </div>
-
+            {okumuraErrorFlag && <ErrorModal errorFlag={okumuraErrorFlag} setErrorFlag={SetokumuraErrorFlag}/>}
         </div>
     )
 }
