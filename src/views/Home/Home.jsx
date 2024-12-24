@@ -302,21 +302,24 @@ export default function Home(){
                                 ahm=3.2*(Math.log10(11.75*okumuraValueInputs.rxHeight))^2 - 4.97    // Mayor a 300 MHz
                             }
                         }
-
-                        let L=69.55 + 26.16*Math.log10(frequency) - 13.82*Math.log10(okumuraValueInputs.txHeight) - ahm + (44.9-6.55*Math.log10(okumuraValueInputs.txHeight))*Math.log10(Math.abs(distmax-dist[x]));
-                        console.log((Math.abs(distmax-dist[x])))
-                        console.log(26.16*Math.log10(frequency),'-',13.82*Math.log10(okumuraValueInputs.txHeight), '-', ahm ,'+', (44.9 - (6.55*Math.log10(okumuraValueInputs.txHeight))), '*' ,Math.log10(Math.abs(distmax-dist[x])),'Total',L)
-                        if(okumuraValueInputs.areaType!==undefined){
-                            if(okumuraValueInputs.areaType==1){
-                                K=2*Math.log10(frequency/28)^2+5.4
-                            }
-                            else if(okumuraValueInputs.areaType==2){
-                                K=4.78*Math.log10(frequency)^2 - 18.3*Math.log10(frequency)+40.94
-                            }
+                        if (dist[x] == distmax) {       // Valor máximo, no tendría perdidas
+                            listadbscal[x] = pot[x];
                         }
-                        // console.log(pot[x],{ahm},{L},{K})
-                        listadbscal[x] = pot[x] - L -K ;
-                        // listadbscal[x] = pot[x] ;
+                        else{
+                            let L=69.55 + 26.16*Math.log10(frequency) - 13.82*Math.log10(okumuraValueInputs.txHeight) - ahm + (44.9-6.55*Math.log10(okumuraValueInputs.txHeight))*Math.log10(Math.abs(distmax-dist[x])/1000);
+                            // console.log((Math.abs(distmax-dist[x])))
+                            console.log(26.16*Math.log10(frequency),'-',13.82*Math.log10(okumuraValueInputs.txHeight), '-', ahm ,'+', (44.9 - (6.55*Math.log10(okumuraValueInputs.txHeight))), '*' ,Math.log10(Math.abs(distmax-dist[x])/1000),'Total',L)
+                            if(okumuraValueInputs.areaType!==undefined){
+                                if(okumuraValueInputs.areaType==1){
+                                    K=2*Math.log10(frequency/28)^2+5.4
+                                }
+                                else if(okumuraValueInputs.areaType==2){
+                                    K=4.78*Math.log10(frequency)^2 - 18.3*Math.log10(frequency)+40.94
+                                }
+                            }
+                            // console.log(pot[x],{ahm},{L},{K})
+                            listadbscal[x] = pot[x] - L -K ;
+                        }
                     }		
                     console.log('Ejecutando okumura con:', okumuraValueInputs)
 
