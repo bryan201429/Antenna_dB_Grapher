@@ -15,6 +15,9 @@ export default function Home(){
     const [maxPotForScale,setMaxPotForScale]=useState(20);
     const [minPotForScale,setMinPotForScale]=useState(-20);
     const [maxDistance,setMaxDistance]=useState(0);
+    const [minDistance,setMinDistance]=useState(0);
+    const [okumuraCompatible,setOkumuraCompatible]=useState(false);
+    const [okumuraCompatibleMessageShow,setOkumuraCompatibleMessageShow]=useState(false);
     const [distanceToScal,setDistanceToScal]=useState(0);
     const [selectedModel,setSelectedModel]=useState(0);
     const [okumuraSettingsVisibility,setOkumuraSettingsVisibility]=useState(false); //Visibilidad de ajustes para Modelo Okumura
@@ -24,7 +27,7 @@ export default function Home(){
     const [okumuraReady,SetOkumuraReady ]= useState(false);
 
     const c=2.99792458e8;
-    const [frequency,setFrequency]=useState(3e6);
+    const [frequency,setFrequency]=useState(undefined);
     const [data,setData]=useState([
             {
                 type: 'scatterpolar',
@@ -199,7 +202,7 @@ export default function Home(){
         
         if(dataCSV){
             setHeaders(dataCSV[0]);
-
+            
             const rows = dataCSV;
             const csvDataLong=rows.length;
             let temporal=0;
@@ -214,7 +217,7 @@ export default function Home(){
             let lon=[];
             let alt=[];
             let freq=[];
-            
+            let frequency=0;
             for(let x=1;x<csvDataLong;x++){
                 // console.log("Fila:", rows[x]);
                 pot[x-1]=parseFloat(rows[x][0]);
@@ -226,6 +229,7 @@ export default function Home(){
             if(freq){
                 console.log('Frecuencia detectada:', freq[0])
                 setFrequency(freq[0])
+                frequency=Number(freq[0]);
             }
 
             let lat1 = -16.426006833333332; lat1 = lat1 * Math.PI / 180;          //Origen geográfico conocido de la señal
@@ -241,7 +245,6 @@ export default function Home(){
                 let dlat=lat2-lat1;
 
                 let a=Math.sin(dlat/2)*Math.sin(dlat/2)+Math.cos(lon1)*Math.cos(lon2)*Math.sin(dlon/2)*Math.sin(dlon/2);
-            
                 let c = 2 * Math.atan2(Math.sqrt(Math.abs(a)), Math.sqrt(1 - a));
                 let Base=6371*c*1000;
 
@@ -249,7 +252,6 @@ export default function Home(){
                 Math.sin(lon2-lon1)*Math.cos(lat2));
                 
                 Bearing=((Bearing * 180 / Math.PI + 360) % 360);
-
                 dist[x]=Base;   
                 ang[x]=Bearing;
             }
@@ -260,33 +262,55 @@ export default function Home(){
             let listadbscal = [];    //Guardará los valores de db escalados
             let listaDbOrig = pot;
             let distmax=0;
+            let distmin = Infinity;
+            
 
-            for(let x=0;x<csvDataLong-1;x++){ //Hallar distancia más lejana
+            for(let x=0;x<csvDataLong-1;x++){   //Hallar distancia más lejana
                 if(dist[x]>distmax){
                     distmax=dist[x];
                     setMaxDistance(dist[x]);
                 }
+                    
+                if (dist[x] < distmin) {        // Buscar la distancia más cercana
+                    distmin = dist[x];
+                    setMinDistance(dist[x]); 
+                }
+                
             }
             
-
+            if(distmin<1000){
+                setOkumuraCompatible(false);
+                setOkumuraCompatibleMessageShow(true); //Mostrar mensaje de modelo okumura incompatible
+            }
+            else if(distmin){
+                setOkumuraCompatible(true);
+                setOkumuraCompatibleMessageShow(false); 
+            }
+            // console.log('distancias:',dist)
             //! Escalar los demás valores al de distancia máxima :Hallar potencia en transmisor :Potenciatx = Potrx + PathLoss
             setDbOriginal(pot);  //Guardar la pot original sin escalar
 
-            if(selectedModel===0){
+            if(selectedModel===0){  // Modelo FSPL
                 for (let x = 0; x < csvDataLong-1; x++) {
                     if (dist[x] == distmax) {
                         listadbscal[x] = pot[x];
+
                     }
-                    else if(Math.abs(distmax-dist[x]) < (c/frequency)/(4 * Math.PI )){
+                    else if(Math.abs(distmax-dist[x]) < (c/(frequency*10**6))/(4 * Math.PI )){
                          listadbscal[x] = pot[x];
+
                     }
                     else if (dist[x]<distmax) {
-                        let FSPL=(20*Math.log10(Math.abs(distmax-dist[x])))+(20*Math.log10(frequency))+(20*Math.log10(4 * Math.PI / c));
+                        let FSPL=(20*Math.log10(Math.abs(distmax-dist[x])))+(20*Math.log10(frequency*10**6))+(20*Math.log10(4 * Math.PI / c));
                         listadbscal[x] =  pot[x]-FSPL;
+
+                        console.log(distmax,'-',dist[x])
                     }
                 }		
+                console.log('FSPL electo')
+                // console.log('Lista db escalados PREV',listadbscal);
             }
-            else if(selectedModel===1){
+            else if(selectedModel===1){ // Modelo Okumura
                 if(okumuraReady==true){
                     for (let x = 0; x < csvDataLong-1; x++) {
                         let ahm=0;
@@ -296,10 +320,10 @@ export default function Home(){
                         }
                         else if(okumuraValueInputs.citySize==2){ // ciudad grande
                             if(frequency<=300){
-                                ahm=8.29*(Math.log10(1.54*okumuraValueInputs.rxHeight))^2 - 1.1     // Menor a 300 MHz
+                                ahm=8.29*(Math.log10(1.54*okumuraValueInputs.rxHeight))**2 - 1.1     // Menor a 300 MHz
                             }
                             else if(frequency>300){
-                                ahm=3.2*(Math.log10(11.75*okumuraValueInputs.rxHeight))^2 - 4.97    // Mayor a 300 MHz
+                                ahm=3.2*(Math.log10(11.75*okumuraValueInputs.rxHeight))**2 - 4.97    // Mayor a 300 MHz
                             }
                         }
                         if (dist[x] == distmax) {       // Valor máximo, no tendría perdidas
@@ -307,18 +331,19 @@ export default function Home(){
                         }
                         else{
                             let L=69.55 + 26.16*Math.log10(frequency) - 13.82*Math.log10(okumuraValueInputs.txHeight) - ahm + (44.9-6.55*Math.log10(okumuraValueInputs.txHeight))*Math.log10(Math.abs(distmax-dist[x])/1000);
-                            // console.log((Math.abs(distmax-dist[x])))
-                            console.log(26.16*Math.log10(frequency),'-',13.82*Math.log10(okumuraValueInputs.txHeight), '-', ahm ,'+', (44.9 - (6.55*Math.log10(okumuraValueInputs.txHeight))), '*' ,Math.log10(Math.abs(distmax-dist[x])/1000),'Total',L)
+                            
+                            // console.log(26.16*Math.log10(frequency),'-',13.82*Math.log10(okumuraValueInputs.txHeight), '-', ahm ,'+', (44.9 - (6.55*Math.log10(okumuraValueInputs.txHeight))), '*' ,Math.log10(Math.abs(distmax-dist[x])/1000),'Total',L)
                             if(okumuraValueInputs.areaType!==undefined){
                                 if(okumuraValueInputs.areaType==1){
-                                    K=2*Math.log10(frequency/28)^2+5.4
+                                    K=2*((Math.log10(500/28))**2) + 5.4
                                 }
                                 else if(okumuraValueInputs.areaType==2){
-                                    K=4.78*Math.log10(frequency)^2 - 18.3*Math.log10(frequency)+40.94
+                                    K=4.78*(Math.log10(500))**2 - (18.3*(Math.log10(500))) + 40.94
                                 }
                             }
-                            // console.log(pot[x],{ahm},{L},{K})
-                            listadbscal[x] = pot[x] - L -K ;
+
+                            console.log(pot[x],{ahm},{L},{K},{frequency})
+                            listadbscal[x] = pot[x] - (L -K) ;
                         }
                     }		
                     console.log('Ejecutando okumura con:', okumuraValueInputs)
@@ -332,7 +357,7 @@ export default function Home(){
            
             // console.log('Lista dist PREV:',dist);
             // console.log('Lista db PREV',pot);
-            // console.log('Lista db escalados PREV',listadbscal);
+            
             // console.log('Angulos NO ordenados: ',ang);
 
         //! ///////////////////////// ORDENAR ARRAYS SEGUN ANGULOS DE FORMA ASCENDENTE /////////////////////////////////////
@@ -392,7 +417,10 @@ export default function Home(){
             ];
             setData(datagraph);
         }
-    },[dataCSV,selectedModel,okumuraReady])
+        else{
+            setOkumuraCompatibleMessageShow(false); //Mensaje de "okumura incompatible" oculto
+        }
+    },[dataCSV,frequency,selectedModel,okumuraReady])
 
 
 
@@ -423,11 +451,13 @@ useEffect(()=>{
                     </div>
                     <div className='freqContainer'>
                         <h3>Frecuencia detectada: </h3>
-                        <h3>{`${frequency} MHz`}</h3>
+                        <h3>{frequency ? `${frequency} MHz` : '-'}</h3>
+
                     </div>
                     <div className='propagationBox'>
                         <h3>Modelo de propagación</h3>
                         <div className='selectModelPropagation'>
+                        
                             <h4>Seleccione un modelo de propagación: </h4>
                             <div>
                                 <label>
@@ -435,11 +465,12 @@ useEffect(()=>{
                                     FSPL
                                 </label>
                                 <label>
-                                    <input type="radio" name="opcion" value="2" onChange={() => {setSelectedModel(1); handlePredictionClick}} checked={selectedModel === 1}/>
+                                    <input type="radio" name="opcion" value="2" onChange={() => {setSelectedModel(1); handlePredictionClick}} checked={selectedModel === 1} disabled={!okumuraCompatible}/>
                                     Okumura-Hata
                                 </label>
                             </div>
                          </div>
+                         {okumuraCompatibleMessageShow && <h3 className='errorMessage'>Modelo de okumura Hata no aplicable (distancia de muestras menor a 1 km)</h3>}
                         {okumuraSettingsVisibility && <div className='OkumuraOptionsContainer'>
                             
                             <div className='altOkumura'>                              
