@@ -349,12 +349,10 @@ export default function Home(){
                     console.log('Ejecutando okumura con:', okumuraValueInputs)
 
                 }
-                else{
-                    console.log('Okumura invalido')
+                else{ console.log('Okumura invalido')
                 }
             }
-            
-           
+
             // console.log('Lista dist PREV:',dist);
             // console.log('Lista db PREV',pot);
             
