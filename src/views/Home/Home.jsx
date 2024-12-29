@@ -150,7 +150,7 @@ export default function Home(){
 
     //! /////////////////////////// Predicción /////////////////////////////////////////////////
     const handlePredictionClick=()=>{                               
-
+        
         let angs=theta;
         let pots=potDbScal;
         let distPrediction=distanceToScal;    
@@ -161,7 +161,8 @@ export default function Home(){
             // console.log('Calculando minimo:',Math.abs(distPrediction-maxDistance),'Bajo: ',(c/frequency)/(4 * Math.PI ))
 
             if(selectedModel===0){          //!FSPL
-                if(Math.abs(distPrediction-maxDistance) < (c/frequency)/(4 * Math.PI )){
+                console.log('Prediction FSPL',frequency*10**6)
+                if(Math.abs(distPrediction-maxDistance) < (c/(frequency*10**6))/(4 * Math.PI )){
                     pot=pot;
                 }
                 else if (distPrediction > maxDistance) {
@@ -301,8 +302,9 @@ export default function Home(){
 
                     }
                     else if (dist[x]<distmax) {
-                        let FSPL=(20*Math.log10(Math.abs(distmax-dist[x])))+(20*Math.log10(frequency*10**6))+(20*Math.log10(4 * Math.PI / c));
-                        listadbscal[x] =  pot[x]-FSPL;
+                        let FSPL=(20*Math.log10(Math.abs(dist[x])))+(20*Math.log10(frequency*10**6))+(20*Math.log10(4 * Math.PI / c));
+                        let FSPL2=(20*Math.log10(Math.abs(distmax)))+(20*Math.log10(frequency*10**6))+(20*Math.log10(4 * Math.PI / c));
+                        listadbscal[x] =  pot[x]+FSPL-FSPL2;
 
                         console.log(distmax,'-',dist[x])
                     }
@@ -317,8 +319,7 @@ export default function Home(){
                         let K=0;                            // Factor de corrección según área
                         if(okumuraValueInputs.citySize==1){ // ciudad pequeña,mediana
                             ahm=(1.1*Math.log10(frequency)-0.7)*okumuraValueInputs.rxHeight-(1.56*Math.log10(frequency)-0.8)
-                        }
-                        else if(okumuraValueInputs.citySize==2){ // ciudad grande
+                        }else if(okumuraValueInputs.citySize==2){ // ciudad grande
                             if(frequency<=300){
                                 ahm=8.29*(Math.log10(1.54*okumuraValueInputs.rxHeight))**2 - 1.1     // Menor a 300 MHz
                             }
@@ -330,8 +331,9 @@ export default function Home(){
                             listadbscal[x] = pot[x];
                         }
                         else{
-                            let L=69.55 + 26.16*Math.log10(frequency) - 13.82*Math.log10(okumuraValueInputs.txHeight) - ahm + (44.9-6.55*Math.log10(okumuraValueInputs.txHeight))*Math.log10(Math.abs(distmax-dist[x])/1000);
-                            
+                            // let L=69.55 + 26.16*Math.log10(frequency) - 13.82*Math.log10(okumuraValueInputs.txHeight) - ahm + (44.9-6.55*Math.log10(okumuraValueInputs.txHeight))*Math.log10(Math.abs(distmax-dist[x])/1000);
+                            let L=69.55 + 26.16*Math.log10(frequency) - 13.82*Math.log10(okumuraValueInputs.txHeight) - ahm + (44.9-6.55*Math.log10(okumuraValueInputs.txHeight))*Math.log10(Math.abs(dist[x])/1000);
+                            let L2=69.55 + 26.16*Math.log10(frequency) - 13.82*Math.log10(okumuraValueInputs.txHeight) - ahm + (44.9-6.55*Math.log10(okumuraValueInputs.txHeight))*Math.log10(Math.abs(distmax)/1000);
                             // console.log(26.16*Math.log10(frequency),'-',13.82*Math.log10(okumuraValueInputs.txHeight), '-', ahm ,'+', (44.9 - (6.55*Math.log10(okumuraValueInputs.txHeight))), '*' ,Math.log10(Math.abs(distmax-dist[x])/1000),'Total',L)
                             if(okumuraValueInputs.areaType!==undefined){
                                 if(okumuraValueInputs.areaType==1){
@@ -342,8 +344,8 @@ export default function Home(){
                                 }
                             }
 
-                            console.log(pot[x],{ahm},{L},{K},{frequency})
-                            listadbscal[x] = pot[x] - (L -K) ;
+                            console.log(pot[x],{ahm},{L},{L2},{K})
+                            listadbscal[x] = pot[x] + (L - K) -(L2 - K);
                         }
                     }		
                     console.log('Ejecutando okumura con:', okumuraValueInputs)
@@ -459,11 +461,11 @@ useEffect(()=>{
                             <h4>Seleccione un modelo de propagación: </h4>
                             <div>
                                 <label>
-                                    <input type="radio" name="opcion" value="1" onChange={() => {setSelectedModel(0); handlePredictionClick}} checked={selectedModel === 0}/>
+                                    <input type="radio" name="opcion" value="1" onChange={() => {setSelectedModel(0); }} checked={selectedModel === 0}/>
                                     FSPL
                                 </label>
                                 <label>
-                                    <input type="radio" name="opcion" value="2" onChange={() => {setSelectedModel(1); handlePredictionClick}} checked={selectedModel === 1} disabled={!okumuraCompatible}/>
+                                    <input type="radio" name="opcion" value="2" onChange={() => {setSelectedModel(1); }} checked={selectedModel === 1} disabled={!okumuraCompatible}/>
                                     Okumura-Hata
                                 </label>
                             </div>
