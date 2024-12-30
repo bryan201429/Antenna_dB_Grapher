@@ -222,3 +222,7 @@ input[type=file]::file-selector-button {
     color: rgb(255, 99, 99);
     font-size: 15px;
 }
+.successMessage{
+    color: rgb(24, 196, 38);
+    font-size: 15px;
+}
