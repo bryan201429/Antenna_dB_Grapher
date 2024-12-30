@@ -9,6 +9,7 @@ export default function Home(){
     const [headers,setHeaders]=useState(null);
     const [theta,setTheta]=useState([]);
     const [dbOriginal,setDbOriginal]=useState([]);
+    const [potTxEstimated,setPotTxEstimated]=useState([]);
     const [potDbScal,setPotDbScal]=useState([]);
     const [dbPrediction,setDbPrediction]=useState([]);
     const [distances,setDistances]=useState([]);
@@ -20,11 +21,21 @@ export default function Home(){
     const [okumuraCompatibleMessageShow,setOkumuraCompatibleMessageShow]=useState(false);
     const [distanceToScal,setDistanceToScal]=useState(0);
     const [selectedModel,setSelectedModel]=useState(0);
+
     const [okumuraSettingsVisibility,setOkumuraSettingsVisibility]=useState(false); //Visibilidad de ajustes para Modelo Okumura
     const [okumuraValidInputs,setOkumuraValidInputs] = useState({txHeight: true, rxHeight: true, citySize:true, areaType:true})
     const [okumuraValueInputs,setOkumuraValueInputs] = useState({txHeight: undefined, rxHeight: undefined, citySize:undefined, areaType:undefined})
     const [okumuraErrorFlag,SetokumuraErrorFlag ]= useState(false);
     const [okumuraReady,SetOkumuraReady ]= useState(false);
+
+    const [selectedModelPrediction,setSelectedModelPrediction]=useState(0);
+    const [okumuraSettingsPredictionVisibility, setOkumuraSettingsPredictionVisibility]=useState(false); 
+    
+    const [okumuraValidInputsPrediction,setOkumuraValidInputsPrediction] = useState({txHeight: true, rxHeight: true, citySize:true, areaType:true})
+    const [okumuraValueInputsPrediction,setOkumuraValueInputsPrediction] = useState({txHeight: undefined, rxHeight: undefined, citySize:undefined, areaType:undefined})
+    const [okumuraErrorFlagPrediction,SetokumuraErrorFlagPrediction ]= useState(false);
+    const [okumuraReadyPrediction,SetOkumuraReadyPrediction ]= useState(false);
+
 
     const c=2.99792458e8;
     const [frequency,setFrequency]=useState(undefined);
@@ -149,33 +160,98 @@ export default function Home(){
 
 
     //! /////////////////////////// Predicción /////////////////////////////////////////////////
+
+            //! ///////////////////// OKUMURA INPUTS ////////////////////////////////////////////
+
+                const txAntennaChangePrediction = (e)=>{
+                    SetOkumuraReadyPrediction(false);
+                    let txAntennaValue=Number(e.target.value)
+                    if(txAntennaValue<30 || txAntennaValue>200){
+                        setOkumuraValidInputsPrediction((prev)=>({...prev, txHeight:false}))
+                        setOkumuraValueInputsPrediction((prev)=>({...prev, txHeight:txAntennaValue}))
+                    }
+                    else{
+                        setOkumuraValidInputsPrediction((prev)=>({...prev, txHeight:true}))
+                        setOkumuraValueInputsPrediction((prev)=>({...prev, txHeight:txAntennaValue}))
+                    }
+                }
+                const rxAntennaChangePrediction = (e)=>{
+                    SetOkumuraReadyPrediction(false);
+                    let rxAntennaValue=Number(e.target.value)
+                    if(rxAntennaValue<1 || rxAntennaValue>10){
+                        setOkumuraValidInputsPrediction((prev)=>({...prev, rxHeight:false}))
+                        setOkumuraValueInputsPrediction((prev)=>({...prev, rxHeight:rxAntennaValue}))
+                    }
+                    else{
+                        setOkumuraValidInputsPrediction((prev)=>({...prev, rxHeight:true}))
+                        setOkumuraValueInputsPrediction((prev)=>({...prev, rxHeight:rxAntennaValue}))
+                        }
+                }
+        
+                const citySizeChangePrediction = (option)=>{
+                    SetOkumuraReadyPrediction(false);
+                    setOkumuraValidInputsPrediction((prev)=>({...prev, citySize:true}))
+                    setOkumuraValueInputsPrediction((prev)=>({...prev, citySize:option}))
+                }
+                const areaTypeChangePrediction = (option)=>{
+                    SetOkumuraReadyPrediction(false);
+                    setOkumuraValidInputsPrediction((prev)=>({...prev, areaType:true}))
+                    setOkumuraValueInputsPrediction((prev)=>({...prev, areaType: prev.areaType == option ? undefined : option,}))
+                }
+        
+        
+                const handleApplyPrediction = () => {
+                    
+                    SetOkumuraReadyPrediction(false);
+                    let validOkumuraFlag=true;
+        
+                    if(okumuraValueInputsPrediction.txHeight==undefined ||okumuraValidInputsPrediction.txHeight==false){
+                        validOkumuraFlag=false;
+                    }
+                    if(okumuraValueInputsPrediction.rxHeight==undefined ||okumuraValidInputsPrediction.rxHeight==false ){
+                        validOkumuraFlag=false;
+                    }
+                    if(okumuraValueInputsPrediction.citySize==undefined ||okumuraValidInputsPrediction.citySize==false){
+                        validOkumuraFlag=false;
+                    }
+                    if(validOkumuraFlag == false){
+                        SetokumuraErrorFlagPrediction(true);  //Mostrar errorModal
+                    }
+                    else if(validOkumuraFlag == true){
+                        SetOkumuraReadyPrediction(true);
+                    }
+                    console.log('Apply button:',{okumuraValueInputsPrediction},{okumuraValidInputsPrediction},{validOkumuraFlag})
+                }
+                
+        
+                useEffect(()=>{
+                    console.log({okumuraValueInputsPrediction})
+                    console.log({okumuraReadyPrediction})
+                },[okumuraReadyPrediction])
+                
     const handlePredictionClick=()=>{                               
         
         let angs=theta;
-        let pots=potDbScal;
+        let pots=potTxEstimated;
         let distPrediction=distanceToScal;    
         let FSPL=0;
 
          pots = pots.map((pot) => {
             let FSPL;
-            // console.log('Calculando minimo:',Math.abs(distPrediction-maxDistance),'Bajo: ',(c/frequency)/(4 * Math.PI ))
 
-            if(selectedModel===0){          //!FSPL
+            if(selectedModelPrediction===0){          //!FSPL
                 console.log('Prediction FSPL',frequency*10**6)
-                if(Math.abs(distPrediction-maxDistance) < (c/(frequency*10**6))/(4 * Math.PI )){
+                if(Math.abs(distPrediction) < (c/(frequency*10**6))/(4 * Math.PI )){
                     pot=pot;
                 }
-                else if (distPrediction > maxDistance) {
-                    FSPL = 20 * Math.log10(Math.abs(distPrediction-maxDistance)) + 20 * Math.log10(frequency) + 20 * Math.log10(4 * Math.PI / c);
+    
+                else {
+                    FSPL = 20 * Math.log10(Math.abs(distPrediction)) + 20 * Math.log10(frequency*10**6) + 20 * Math.log10(4 * Math.PI / c);
                     // console.log('MAYOR', 'distPrediction>maxDistance: Pot=', pot, ' FSPL: ', FSPL, ' maxDistance: ', maxDistance, ' distPrediction: ', distPrediction,'potPredicted: ', pot-FSPL);
                     pot = pot - (FSPL);
-                } else if (distPrediction < maxDistance) {
-                    FSPL = 20 * Math.log10(Math.abs(maxDistance-distPrediction)) + 20 * Math.log10(frequency) + 20 * Math.log10(4 * Math.PI / c);
-                    // console.log('MENOR', 'distPrediction<maxDistance: Pot=', pot, ' FSPL: ', FSPL, ' maxDistance: ', maxDistance, ' distPrediction: ', distPrediction,'potPredicted: ', pot+FSPL);
-                    pot = pot + FSPL;
                 }
             }
-            else if(selectedModel===1){     //!OKUMURA
+            else if(selectedModelPrediction===1){     //!OKUMURA
                 if(Math.abs(distPrediction-maxDistance) < (c/frequency)/(4 * Math.PI )){
                     pot=pot;
                 }
@@ -261,22 +337,20 @@ export default function Home(){
             //! //////////// REDIMENSIONADO DE POTENCIA PARA GRAFICAR ///////////////////////
             
             let listadbscal = [];    //Guardará los valores de db escalados
+            let potEstOrigen = [];
             let listaDbOrig = pot;
             let distmax=0;
             let distmin = Infinity;
-            
-
+        
             for(let x=0;x<csvDataLong-1;x++){   //Hallar distancia más lejana
                 if(dist[x]>distmax){
                     distmax=dist[x];
                     setMaxDistance(dist[x]);
                 }
-                    
                 if (dist[x] < distmin) {        // Buscar la distancia más cercana
                     distmin = dist[x];
                     setMinDistance(dist[x]); 
                 }
-                
             }
             
             if(distmin<1000){
@@ -287,30 +361,31 @@ export default function Home(){
                 setOkumuraCompatible(true);
                 setOkumuraCompatibleMessageShow(false); 
             }
-            // console.log('distancias:',dist)
+
             //! Escalar los demás valores al de distancia máxima :Hallar potencia en transmisor :Potenciatx = Potrx + PathLoss
             setDbOriginal(pot);  //Guardar la pot original sin escalar
 
             if(selectedModel===0){  // Modelo FSPL
                 for (let x = 0; x < csvDataLong-1; x++) {
-                    if (dist[x] == distmax) {
+                    if (dist[x] == distmax) {                   //Distancias cortas no aplica FSPL (sin perdida teórica)
                         listadbscal[x] = pot[x];
-
+                        let FSPL=(20*Math.log10(Math.abs(dist[x])))+(20*Math.log10(frequency*10**6))+(20*Math.log10(4 * Math.PI / c));
+                        potEstOrigen[x]= pot[x] + FSPL;
                     }
-                    else if(Math.abs(distmax-dist[x]) < (c/(frequency*10**6))/(4 * Math.PI )){
+                    else if(Math.abs(dist[x]) < (c/(frequency*10**6))/(4 * Math.PI )){  //Distancias cortas no aplica FSPL (sin perdida teórica)
                          listadbscal[x] = pot[x];
-
-                    }
+                         let FSPL=(20*Math.log10(Math.abs(dist[x])))+(20*Math.log10(frequency*10**6))+(20*Math.log10(4 * Math.PI / c));
+                         potEstOrigen[x]= pot[x] + FSPL;
+                     }
                     else if (dist[x]<distmax) {
                         let FSPL=(20*Math.log10(Math.abs(dist[x])))+(20*Math.log10(frequency*10**6))+(20*Math.log10(4 * Math.PI / c));
                         let FSPL2=(20*Math.log10(Math.abs(distmax)))+(20*Math.log10(frequency*10**6))+(20*Math.log10(4 * Math.PI / c));
                         listadbscal[x] =  pot[x]+FSPL-FSPL2;
-
-                        console.log(distmax,'-',dist[x])
+                        potEstOrigen[x]= pot[x] + FSPL;
+                        // console.log(pot[x],{FSPL},{FSPL2})
                     }
                 }		
-                console.log('FSPL electo')
-                // console.log('Lista db escalados PREV',listadbscal);
+                setPotTxEstimated(potEstOrigen);
             }
             else if(selectedModel===1){ // Modelo Okumura
                 if(okumuraReady==true){
@@ -327,27 +402,28 @@ export default function Home(){
                                 ahm=3.2*(Math.log10(11.75*okumuraValueInputs.rxHeight))**2 - 4.97    // Mayor a 300 MHz
                             }
                         }
-                        if (dist[x] == distmax) {       // Valor máximo, no tendría perdidas
-                            listadbscal[x] = pot[x];
-                        }
-                        else{
-                            // let L=69.55 + 26.16*Math.log10(frequency) - 13.82*Math.log10(okumuraValueInputs.txHeight) - ahm + (44.9-6.55*Math.log10(okumuraValueInputs.txHeight))*Math.log10(Math.abs(distmax-dist[x])/1000);
-                            let L=69.55 + 26.16*Math.log10(frequency) - 13.82*Math.log10(okumuraValueInputs.txHeight) - ahm + (44.9-6.55*Math.log10(okumuraValueInputs.txHeight))*Math.log10(Math.abs(dist[x])/1000);
-                            let L2=69.55 + 26.16*Math.log10(frequency) - 13.82*Math.log10(okumuraValueInputs.txHeight) - ahm + (44.9-6.55*Math.log10(okumuraValueInputs.txHeight))*Math.log10(Math.abs(distmax)/1000);
-                            // console.log(26.16*Math.log10(frequency),'-',13.82*Math.log10(okumuraValueInputs.txHeight), '-', ahm ,'+', (44.9 - (6.55*Math.log10(okumuraValueInputs.txHeight))), '*' ,Math.log10(Math.abs(distmax-dist[x])/1000),'Total',L)
-                            if(okumuraValueInputs.areaType!==undefined){
+                        if(okumuraValueInputs.areaType!==undefined){
                                 if(okumuraValueInputs.areaType==1){
-                                    K=2*((Math.log10(500/28))**2) + 5.4
+                                    K=2*((Math.log10(frequency/28))**2) + 5.4
                                 }
                                 else if(okumuraValueInputs.areaType==2){
-                                    K=4.78*(Math.log10(500))**2 - (18.3*(Math.log10(500))) + 40.94
+                                    K=4.78*(Math.log10(frequency))**2 - (18.3*(Math.log10(frequency))) + 40.94
                                 }
                             }
-
+                        if (dist[x] == distmax) {       // Valor máximo, no tendría perdidas
+                            let L=69.55 + 26.16*Math.log10(frequency) - 13.82*Math.log10(okumuraValueInputs.txHeight) - ahm + (44.9-6.55*Math.log10(okumuraValueInputs.txHeight))*Math.log10(Math.abs(dist[x])/1000);
+                            listadbscal[x] = pot[x];
+                            potEstOrigen[x]= pot[x] + (L - K);
+                        }
+                        else{
+                            let L=69.55 + 26.16*Math.log10(frequency) - 13.82*Math.log10(okumuraValueInputs.txHeight) - ahm + (44.9-6.55*Math.log10(okumuraValueInputs.txHeight))*Math.log10(Math.abs(dist[x])/1000);
+                            let L2=69.55 + 26.16*Math.log10(frequency) - 13.82*Math.log10(okumuraValueInputs.txHeight) - ahm + (44.9-6.55*Math.log10(okumuraValueInputs.txHeight))*Math.log10(Math.abs(distmax)/1000);
                             console.log(pot[x],{ahm},{L},{L2},{K})
                             listadbscal[x] = pot[x] + (L - K) -(L2 - K);
+                            potEstOrigen[x]= pot[x] + (L - K);
                         }
-                    }		
+                    }
+                    setPotTxEstimated(potEstOrigen);		
                     console.log('Ejecutando okumura con:', okumuraValueInputs)
 
                 }
@@ -366,6 +442,7 @@ export default function Home(){
             let dbScalTemp = 0;
             let distTemp = 0;
             let potTemp = 0;
+            let potEstTemp = 0;
 
             for(let j=0; j<csvDataLong-1;j++){ // Recorre el array incrementando el indice de inicio cada vez (el indice menor tiene el numero menor)
 
@@ -383,6 +460,10 @@ export default function Home(){
                 listadbscal[j] = listadbscal[menorpos];
                 listadbscal[menorpos] = dbScalTemp;
 
+                potEstTemp = potEstOrigen[j];
+                potEstOrigen[j] = potEstOrigen[menorpos];
+                potEstOrigen[menorpos] = potEstTemp;
+
                 distTemp = dist[j];
                 dist[j] = dist[menorpos];
                 dist[menorpos] = distTemp;
@@ -390,8 +471,7 @@ export default function Home(){
                 potTemp = listaDbOrig[j];
                 listaDbOrig[j] = listaDbOrig[menorpos];
                 listaDbOrig[menorpos] = potTemp;
-
-                menor = 1000;
+                menor = 5000;
             }
             // console.log('Angulos ordenados: ',ang);
             // console.log('Lista dist:',dist);
@@ -432,6 +512,15 @@ useEffect(()=>{
         setOkumuraSettingsVisibility(false);
     } 
 },[selectedModel])
+
+useEffect(()=>{
+    if(selectedModelPrediction==1){
+        setOkumuraSettingsPredictionVisibility(true);
+    }
+    else{
+        setOkumuraSettingsPredictionVisibility(false);
+    } 
+},[selectedModelPrediction])
 
     return(
         <div id='Home'>
@@ -515,12 +604,77 @@ useEffect(()=>{
                             <button className='applyOkumuraButton' onClick={handleApply}> Aplicar Modelo</button>
                         </div>}
                     </div>
+
+
+
+
+
+
+
                     <div className='predictionBox'>
                         <h3>Predicción</h3>
+                        <div className='selectModelPropagation'>
+                        
+                        <h4>Seleccione un modelo de propagación: </h4>
+                        <div>
+                            <label>
+                                <input type="radio" name="predictionOption" value="1" onChange={() => {setSelectedModelPrediction(0); }} checked={selectedModelPrediction === 0}/>
+                                FSPL
+                            </label>
+                            <label>
+                                <input type="radio" name="predictionOption" value="2" onChange={() => {setSelectedModelPrediction(1); }} checked={selectedModelPrediction === 1}/>
+                                Okumura-Hata
+                            </label>
+                        </div>
+                     </div>
+
+                    {okumuraSettingsPredictionVisibility && <div className='OkumuraOptionsContainer'>
+                        
+                        <div className='altOkumura'>                              
+                            <label className='labelOkumura'> Altura de la antena transmisora: <label className='labelOkumura2'> (Rango permitido: 30 - 200 metros) </label></label>
+                            <input type= 'number' value={okumuraValueInputsPrediction.txHeight} onChange={txAntennaChangePrediction}  className={`${!okumuraValidInputsPrediction.txHeight ? 'invalidInput' : ''} altsOkumura`}/>
+                            
+                        </div>
+                        <div className='altOkumura'>   
+                            <label className='labelOkumura'> Altura de la antena receptora: <label className='labelOkumura2'> (Rango permitido: 1 - 10 metros) </label> </label>
+                            <input type='number' value={okumuraValueInputsPrediction.rxHeight} onChange={rxAntennaChangePrediction}  className={`${!okumuraValidInputsPrediction.rxHeight ? 'invalidInput' : ''} altsOkumura`}/>
+                            
+                        </div>
+                        <div className='okumuraCorrectionsBox'>
+                            Seleccionar tamaño de ciudad:
+                            <div>
+                                <label>
+                                    <input type="radio" name="tamañoCiudadPrediction" value="1" onChange={()=>citySizeChangePrediction(1)} />
+                                    Pequeña / mediana
+                                    </label>
+                                <label>
+                                    <input type="radio" name="tamañoCiudadPrediction" value="2" onChange={()=>citySizeChangePrediction(2)} />
+                                    Grande
+                                </label>
+                            </div>
+                        
+                        </div>
+                            
+                        <div className='okumuraCorrectionsBox'>
+                            Tipo de área:
+                            <div>
+                                <label>
+                                    <input type="radio" name="tipoAreaPrediction" onClick={() => areaTypeChangePrediction(1)} checked={okumuraValueInputsPrediction.areaType == 1}/>
+                                    Suburbana
+                                    </label>
+                                <label>
+                                    <input type="radio" name="tipoAreaPrediction" onClick={() => areaTypeChangePrediction(2)} checked={okumuraValueInputsPrediction.areaType == 2}/>
+                                    Rural / Abiertaa
+                                </label>
+                            </div>
+                        
+                        </div>
+                        <button className='applyOkumuraButton' onClick={handleApplyPrediction}> Confirmar datos para Modelo de predicción</button>
+                    </div>}
                         <div>
                             <label>Ingrese una distancia de estimación (m):</label>
-                            <input type='range' name='distancia' min={0} max='300' step='0.5' onChange={handleSliderChange} id='slideInput'></input>
-                            <input type='textbox' id='inputTextBox' min={0} max='300' onChange={handleTextBoxChange}></input>
+                            <input type='range' name='distancia' min={0} max='5000' step='0.5' onChange={handleSliderChange} id='slideInput'></input>
+                            <input type='textbox' id='inputTextBox' min={0} max='5000' onChange={handleTextBoxChange}></input>
                             <button id='predictionButton' onClick={handlePredictionClick}>Prediction</button>
                         </div>
                         
@@ -544,7 +698,8 @@ useEffect(()=>{
                             <th>Theta</th>
                             <th>Dist. Original</th>
                             <th>Dist. Escalada</th>
-                            <th>Pot. Original</th>
+                            <th>Pot. Medida</th>
+                            <th>Pot. Estimada en Origen</th>
                             <th>Potencia Escalada</th>
                             <th>PotPredicted</th>
 
@@ -558,6 +713,7 @@ useEffect(()=>{
                                     <td>{distances[i]}</td> 
                                     <td>{maxDistance}</td> 
                                     <td>{dbOriginal[i]}</td> 
+                                    <td>{potTxEstimated[i]}</td>
                                     <td>{potDbScal[i]}</td> 
                                     <td>{dbPrediction[i]}</td> 
                                 </tr>
@@ -569,7 +725,8 @@ useEffect(()=>{
         
                 </div>
                </div>
-            {okumuraErrorFlag && <ErrorModal errorFlag={okumuraErrorFlag} setErrorFlag={SetokumuraErrorFlag}/>}
+            {okumuraErrorFlag && <ErrorModal errorFlag={okumuraErrorFlag} message="Verificar los datos del modelo de Okumura" setErrorFlag={SetokumuraErrorFlag}/>}
+            {okumuraErrorFlagPrediction && <ErrorModal errorFlag={okumuraErrorFlagPrediction} message="Verificar datos para Predicción" setErrorFlag={SetokumuraErrorFlagPrediction}/>}
         </div>
     )
 }
