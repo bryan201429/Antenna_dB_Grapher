@@ -417,7 +417,7 @@ export default function Home(){
 
             if(selectedModel===0){  // Modelo FSPL
                 for (let x = 0; x < csvDataLong-1; x++) {
-                    if (dist[x] == distmax) {                   //Distancias cortas no aplica FSPL (sin perdida teórica)
+                    if (dist[x] == distmax) {                  
                         listadbscal[x] = pot[x];
                         let FSPL=(20*Math.log10(Math.abs(dist[x])))+(20*Math.log10(frequencyLocal*10**6))+(20*Math.log10(4 * Math.PI / c));
                         potEstOrigen[x]= pot[x] + FSPL;
@@ -432,7 +432,6 @@ export default function Home(){
                         let FSPL2=(20*Math.log10(Math.abs(distmax)))+(20*Math.log10(frequencyLocal*10**6))+(20*Math.log10(4 * Math.PI / c));
                         listadbscal[x] =  pot[x]+FSPL-FSPL2;
                         potEstOrigen[x]= pot[x] + FSPL;
-                        // console.log(pot[x],{FSPL},{FSPL2})
                     }
                 }		
                 setPotTxEstimated(potEstOrigen);
@@ -488,52 +487,88 @@ export default function Home(){
 
         //! ///////////////////////// ORDENAR ARRAYS SEGUN ANGULOS DE FORMA ASCENDENTE /////////////////////////////////////
 
-            menor = 1000;
-            let dbScalTemp = 0;
-            let distTemp = 0;
-            let potTemp = 0;
-            let potEstTemp = 0;
+            // menor = 1000;
+            // let dbScalTemp = 0;
+            // let distTemp = 0;
+            // let potTemp = 0;
+            // let potEstTemp = 0;
 
-            for(let j=0; j<csvDataLong-1;j++){ // Recorre el array incrementando el indice de inicio cada vez (el indice menor tiene el numero menor)
+            // for(let j=0; j<csvDataLong-1;j++){ // Recorre el array incrementando el indice de inicio cada vez (el indice menor tiene el numero menor)
 
-                for(let i=j;i<csvDataLong-1;i++){
-                    if(ang[i]<menor){
-                        menor=ang[i];
-                        menorpos=i;
-                    }    
-                }
-                temporal=ang[j];
-                ang[j]=menor;        // Se asigna el valor menor a la posicion 0 del array
-                ang[menorpos]=temporal; //Se intercambia el menor valor 
+            //     for(let i=j;i<csvDataLong-1;i++){
+            //         if(ang[i]<menor){
+            //             menor=ang[i];
+            //             menorpos=i;
+            //         }    
+            //     }
+            //     temporal=ang[j];
+            //     ang[j]=menor;        // Se asigna el valor menor a la posicion 0 del array
+            //     ang[menorpos]=temporal; //Se intercambia el menor valor 
 
-                dbScalTemp = listadbscal[j];
-                listadbscal[j] = listadbscal[menorpos];
-                listadbscal[menorpos] = dbScalTemp;
+            //     dbScalTemp = listadbscal[j];
+            //     listadbscal[j] = listadbscal[menorpos];
+            //     listadbscal[menorpos] = dbScalTemp;
 
-                potEstTemp = potEstOrigen[j];
-                potEstOrigen[j] = potEstOrigen[menorpos];
-                potEstOrigen[menorpos] = potEstTemp;
+            //     potEstTemp = potEstOrigen[j];
+            //     potEstOrigen[j] = potEstOrigen[menorpos];
+            //     potEstOrigen[menorpos] = potEstTemp;
 
-                distTemp = dist[j];
-                dist[j] = dist[menorpos];
-                dist[menorpos] = distTemp;
+            //     distTemp = dist[j];
+            //     dist[j] = dist[menorpos];
+            //     dist[menorpos] = distTemp;
 
-                potTemp = listaDbOrig[j];
-                listaDbOrig[j] = listaDbOrig[menorpos];
-                listaDbOrig[menorpos] = potTemp;
-                menor = 5000;
-            }
-            // console.log('Angulos ordenados: ',ang);
-            // console.log('Lista dist:',dist);
-            // console.log('Lista db escalados',listadbscal);
-            // console.log('Lista db origin',listadbscal);
-            setTheta(ang);
-            setPotDbScal(listadbscal);
-            setDistances(dist);
-            setDbOriginal(listaDbOrig); 
+            //     potTemp = listaDbOrig[j];
+            //     listaDbOrig[j] = listaDbOrig[menorpos];
+            //     listaDbOrig[menorpos] = potTemp;
+            //     menor = 5000;
+            // }
+            // // console.log('Angulos ordenados: ',ang);
+            // // console.log('Lista dist:',dist);
+            // // console.log('Lista db escalados',listadbscal);
+            // // console.log('Lista db origin',listadbscal);
+            // setTheta(ang);
+            // setPotDbScal(listadbscal);
+            // setDistances(dist);
+            // setDbOriginal(listaDbOrig); 
+            // setPotTxEstimated(potEstOrigen);
+            // setMaxPotForScale(Math.max(...listadbscal));
+            // setMinPotForScale(Math.min(...listadbscal));
 
-            setMaxPotForScale(Math.max(...listadbscal));
-            setMinPotForScale(Math.min(...listadbscal));
+            // Combina los arrays en un solo array de objetos para mantener la relación entre ellos
+                const combinedData = ang.map((value, index) => ({
+                    ang: value,
+                    dbScal: listadbscal[index],
+                    dist: dist[index],
+                    pot: listaDbOrig[index],
+                    potEst: potEstOrigen[index],
+                }));
+
+                // Ordena el array combinado según los valores de `ang`
+                combinedData.sort((a, b) => a.ang - b.ang);
+
+                // Separa los arrays ordenados
+                const angSorted = combinedData.map(item => item.ang);
+                const dbScalSorted = combinedData.map(item => item.dbScal);
+                const distSorted = combinedData.map(item => item.dist);
+                const potSorted = combinedData.map(item => item.pot);
+                const potEstSorted = combinedData.map(item => item.potEst);
+
+                // Actualiza los estados con los valores ordenados
+                setTheta(angSorted);
+                setPotDbScal(dbScalSorted);
+                setDistances(distSorted);
+                setDbOriginal(potSorted);
+                setPotTxEstimated(potEstSorted);
+
+                // Calcula y establece los valores máximo y mínimo de la potencia escalada
+                setMaxPotForScale(Math.max(...dbScalSorted));
+                setMinPotForScale(Math.min(...dbScalSorted));
+
+                // Opcional: logs para verificar los resultados
+                console.log('Ángulos ordenados:', angSorted);
+                console.log('Lista distancias:', distSorted);
+                console.log('Lista db escalados:', dbScalSorted);
+                console.log('Lista db original:', potSorted);
 
             //! ////////////////////		GRAFICO POLAR		////////////////
 
