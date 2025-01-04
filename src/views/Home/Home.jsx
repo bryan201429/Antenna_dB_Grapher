@@ -575,8 +575,8 @@ export default function Home(){
             const datagraph = [
                 {
                     type: 'scatterpolar',
-                    r: listadbscal,
-                    theta: ang,
+                    r: dbScalSorted,
+                    theta: angSorted,
                     fill: 'toself'
                 }
             ];
@@ -808,7 +808,6 @@ useEffect(()=>{
 
                         </tbody>
                     </table>
-        
                 </div>
                </div>
             {okumuraErrorFlag && <ErrorModal errorFlag={okumuraErrorFlag} message="Verificar los datos del modelo de Okumura" setErrorFlag={SetokumuraErrorFlag}/>}
