@@ -336,7 +336,7 @@ export default function Home(){
                     }
                 });
             }
-            console.log('Modo estatico:',staticMode);
+            // console.log('Modo estatico:',staticMode);
 
             if(staticMode === false){  //Receptor con capturas variables, radios variables
            
@@ -394,8 +394,38 @@ export default function Home(){
                 }
             }
             else if(staticMode === true){
+                    for(let x=1;x<csvDataLong;x++){
+                        pot[x-1]=parseFloat(rows[x][0]);
+                        alt[x-1]=rows[x][3];
+                        freq[x-1]=rows[x][4];
+                    }
+                    for (let x=1; x<csvDataLong;x++){
+                        dist[x-1]=rows[x][2];
+                        ang[x-1] =rows[x][1]
+                    }
+                    if(freq){
+                        // console.log('Frecuencia detectada:', freq[0])
+                        if(frequency!=freq[0]){
+                            // console.log('cambio de freq',{frequency},{frequencyLocal})
+                            setOkumuraValueInputs({txHeight: undefined, rxHeight: undefined, citySize:undefined, areaType:undefined});
+                            setOkumuraValidInputs({txHeight: true, rxHeight: true, citySize:true, areaType:true});
+                            SetokumuraErrorFlag(false);
+                            SetOkumuraReady(false);
+                            setOkumuraSettingsVisibility(false);
                 
-
+                            setOkumuraValueInputsPrediction({txHeight: undefined, rxHeight: undefined, citySize:undefined, areaType:undefined});
+                            setOkumuraValidInputsPrediction({txHeight: true, rxHeight: true, citySize:true, areaType:true});
+                            SetokumuraErrorFlagPrediction(false);
+                            SetOkumuraReadyPrediction(false);
+                
+                            setSelectedModel(0)
+                            setSelectedModelPrediction(0)
+                            setOkumuraSettingsPredictionVisibility(false)
+                            setMinDistancePrediction(0)
+                            }
+                            setFrequency(freq[0])
+                            frequencyLocal=Number(freq[0]);
+                    }
             }
 
             //! //////////// REDIMENSIONADO DE POTENCIA PARA GRAFICAR ///////////////////////
