@@ -321,47 +321,61 @@ export default function Home(){
             let alt=[];
             let freq=[];
             let frequencyLocal=0;
+            let staticMode=false;
 
             setDbPrediction([]);
-           
-            for(let x=1;x<csvDataLong;x++){
-
-                pot[x-1]=parseFloat(rows[x][0]);
-                lat[x-1]=rows[x][1];
-                lon[x-1]=rows[x][2];
-                alt[x-1]=rows[x][3];
-                freq[x-1]=rows[x][4];
-            }
-            if(freq){
-                console.log('Frecuencia detectada:', freq[0])
-                
-               
-            if(frequency!=freq[0]){
-                console.log('cambio de freq',{frequency},{frequencyLocal})
-                setOkumuraValueInputs({txHeight: undefined, rxHeight: undefined, citySize:undefined, areaType:undefined});
-                setOkumuraValidInputs({txHeight: true, rxHeight: true, citySize:true, areaType:true});
-                SetokumuraErrorFlag(false);
-                SetOkumuraReady(false);
-                setOkumuraSettingsVisibility(false);
-    
-                setOkumuraValueInputsPrediction({txHeight: undefined, rxHeight: undefined, citySize:undefined, areaType:undefined});
-                setOkumuraValidInputsPrediction({txHeight: true, rxHeight: true, citySize:true, areaType:true});
-                SetokumuraErrorFlagPrediction(false);
-                SetOkumuraReadyPrediction(false);
-    
-                setSelectedModel(0)
-                setSelectedModelPrediction(0)
-                setOkumuraSettingsPredictionVisibility(false)
-                setMinDistancePrediction(0)
-                }
-                setFrequency(freq[0])
-                frequencyLocal=Number(freq[0]);
-            }
 
 
             let lat1 = -16.426006833333332; lat1 = lat1 * Math.PI / 180;          //Origen geográfico conocido de la señal
             let lon1 = -71.57327866666667; lon1 = lon1 * Math.PI / 180;           //Origen geográfico conocido de la señal
 
+            if (rows[0]) {
+                rows[0].forEach(column => {
+                    if (typeof column === 'string' && column.toLowerCase().includes('grado')) {
+                        staticMode = true;
+                    }
+                });
+            }
+            console.log('Modo estatico:',staticMode);
+
+            if(staticMode === false){  //Receptor con capturas variables, radios variables
+           
+                for(let x=1;x<csvDataLong;x++){
+                    
+                    pot[x-1]=parseFloat(rows[x][0]);
+                    lat[x-1]=rows[x][1];
+                    lon[x-1]=rows[x][2];
+                    alt[x-1]=rows[x][3];
+                    freq[x-1]=rows[x][4];
+                }
+                if(freq){
+                    console.log('Frecuencia detectada:', freq[0])
+                    if(frequency!=freq[0]){
+                        // console.log('cambio de freq',{frequency},{frequencyLocal})
+                        setOkumuraValueInputs({txHeight: undefined, rxHeight: undefined, citySize:undefined, areaType:undefined});
+                        setOkumuraValidInputs({txHeight: true, rxHeight: true, citySize:true, areaType:true});
+                        SetokumuraErrorFlag(false);
+                        SetOkumuraReady(false);
+                        setOkumuraSettingsVisibility(false);
+            
+                        setOkumuraValueInputsPrediction({txHeight: undefined, rxHeight: undefined, citySize:undefined, areaType:undefined});
+                        setOkumuraValidInputsPrediction({txHeight: true, rxHeight: true, citySize:true, areaType:true});
+                        SetokumuraErrorFlagPrediction(false);
+                        SetOkumuraReadyPrediction(false);
+            
+                        setSelectedModel(0)
+                        setSelectedModelPrediction(0)
+                        setOkumuraSettingsPredictionVisibility(false)
+                        setMinDistancePrediction(0)
+                        }
+                        setFrequency(freq[0])
+                        frequencyLocal=Number(freq[0]);
+                }
+            }
+            else if(staticMode === true){
+                
+
+            }
         //! //////////// CONVERSION DE LAT Y LONG A DIST, ANG ///////////////////////
             for(let x=0;x<csvDataLong-1;x++){
 
@@ -474,33 +488,26 @@ export default function Home(){
                     }
                     setPotTxEstimated(potEstOrigen);		
                     console.log('Ejecutando okumura con:', okumuraValueInputs)
-
                 }
                 else{ console.log('Okumura invalido')
                 }
             }
-
             // console.log('Lista dist PREV:',dist);
             // console.log('Lista db PREV',pot);
-            
             // console.log('Angulos NO ordenados: ',ang);
 
         //! ///////////////////////// ORDENAR ARRAYS SEGUN ANGULOS DE FORMA ASCENDENTE /////////////////////////////////////
-
             // menor = 1000;
             // let dbScalTemp = 0;
             // let distTemp = 0;
             // let potTemp = 0;
             // let potEstTemp = 0;
-
             // for(let j=0; j<csvDataLong-1;j++){ // Recorre el array incrementando el indice de inicio cada vez (el indice menor tiene el numero menor)
-
             //     for(let i=j;i<csvDataLong-1;i++){
             //         if(ang[i]<menor){
             //             menor=ang[i];
             //             menorpos=i;
-            //         }    
-            //     }
+            //         } }
             //     temporal=ang[j];
             //     ang[j]=menor;        // Se asigna el valor menor a la posicion 0 del array
             //     ang[menorpos]=temporal; //Se intercambia el menor valor 
@@ -522,10 +529,6 @@ export default function Home(){
             //     listaDbOrig[menorpos] = potTemp;
             //     menor = 5000;
             // }
-            // // console.log('Angulos ordenados: ',ang);
-            // // console.log('Lista dist:',dist);
-            // // console.log('Lista db escalados',listadbscal);
-            // // console.log('Lista db origin',listadbscal);
             // setTheta(ang);
             // setPotDbScal(listadbscal);
             // setDistances(dist);
@@ -564,11 +567,10 @@ export default function Home(){
                 setMaxPotForScale(Math.max(...dbScalSorted));
                 setMinPotForScale(Math.min(...dbScalSorted));
 
-                // Opcional: logs para verificar los resultados
-                console.log('Ángulos ordenados:', angSorted);
-                console.log('Lista distancias:', distSorted);
-                console.log('Lista db escalados:', dbScalSorted);
-                console.log('Lista db original:', potSorted);
+                // console.log('Ángulos ordenados:', angSorted);
+                // console.log('Lista distancias:', distSorted);
+                // console.log('Lista db escalados:', dbScalSorted);
+                // console.log('Lista db original:', potSorted);
 
             //! ////////////////////		GRAFICO POLAR		////////////////
 
@@ -793,7 +795,7 @@ useEffect(()=>{
                         <tbody> 
                             {theta&&theta.map((column,i)=>{
                                 return( 
-                                <tr> 
+                                <tr key={i}>
                                     <td>{i}</td>
                                     <td>{theta[i]}</td> 
                                     <td>{distances[i]}</td> 
