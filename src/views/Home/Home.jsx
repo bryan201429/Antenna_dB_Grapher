@@ -371,32 +371,32 @@ export default function Home(){
                         setFrequency(freq[0])
                         frequencyLocal=Number(freq[0]);
                 }
+       
+                //! //////////// CONVERSION DE LAT Y LONG A DIST, ANG ///////////////////////
+                for(let x=0;x<csvDataLong-1;x++){
+
+                    let lat2=lat[x] * Math.PI / 180;
+                    let lon2=lon[x] * Math.PI / 180;
+                    
+                    let dlon=lon2-lon1;
+                    let dlat=lat2-lat1;
+
+                    let a=Math.sin(dlat/2)*Math.sin(dlat/2)+Math.cos(lon1)*Math.cos(lon2)*Math.sin(dlon/2)*Math.sin(dlon/2);
+                    let c = 2 * Math.atan2(Math.sqrt(Math.abs(a)), Math.sqrt(1 - a));
+                    let Base=6371*c*1000;
+
+                    let Bearing = Math.atan2(Math.cos(lat1)*Math.sin(lat2)-Math.sin(lat1)*Math.cos(lat2)*Math.cos(lon2-lon1),
+                    Math.sin(lon2-lon1)*Math.cos(lat2));
+                    
+                    Bearing=((Bearing * 180 / Math.PI + 360) % 360);
+                    dist[x]=Base;   
+                    ang[x]=Bearing;
+                }
             }
             else if(staticMode === true){
                 
 
             }
-        //! //////////// CONVERSION DE LAT Y LONG A DIST, ANG ///////////////////////
-            for(let x=0;x<csvDataLong-1;x++){
-
-                let lat2=lat[x] * Math.PI / 180;
-                let lon2=lon[x] * Math.PI / 180;
-                
-                let dlon=lon2-lon1;
-                let dlat=lat2-lat1;
-
-                let a=Math.sin(dlat/2)*Math.sin(dlat/2)+Math.cos(lon1)*Math.cos(lon2)*Math.sin(dlon/2)*Math.sin(dlon/2);
-                let c = 2 * Math.atan2(Math.sqrt(Math.abs(a)), Math.sqrt(1 - a));
-                let Base=6371*c*1000;
-
-                let Bearing = Math.atan2(Math.cos(lat1)*Math.sin(lat2)-Math.sin(lat1)*Math.cos(lat2)*Math.cos(lon2-lon1),
-                Math.sin(lon2-lon1)*Math.cos(lat2));
-                
-                Bearing=((Bearing * 180 / Math.PI + 360) % 360);
-                dist[x]=Base;   
-                ang[x]=Bearing;
-            }
-
 
             //! //////////// REDIMENSIONADO DE POTENCIA PARA GRAFICAR ///////////////////////
             
