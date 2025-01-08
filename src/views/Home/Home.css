@@ -138,6 +138,19 @@ input[type=file]::file-selector-button {
 .applyOkumuraButton:active{
     background-color: white;
 }
+
+#predictionButton{
+    margin-right: 20px;
+    border: none;
+    background: #b38117;
+    padding: 10px 20px;
+    border-radius: 5px;
+    color: #fff;
+    cursor: pointer;
+    transition: background .1s ease-in-out;
+    margin-left: auto;
+    margin-right: auto;
+}
 .plotChart{
     width: 100%;
     height: 100%;
@@ -224,5 +237,9 @@ input[type=file]::file-selector-button {
 }
 .successMessage{
     color: rgb(24, 196, 38);
+    font-size: 15px;
+}
+.staticCSVText{
+    color: rgb(24, 196, 110);
     font-size: 15px;
 }

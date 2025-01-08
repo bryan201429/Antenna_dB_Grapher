@@ -20,7 +20,8 @@ export default function Home(){
     const [okumuraCompatible,setOkumuraCompatible]=useState(false);
     const [okumuraCompatibleMessageShow,setOkumuraCompatibleMessageShow]=useState(false);
     const [distanceToScal,setDistanceToScal]=useState(0);
-    const [selectedModel,setSelectedModel]=useState(0);
+    const [selectedModel,setSelectedModel]=useState(0); 
+    const [staticCsv,setStaticCsv] = useState(false);
 
     const [okumuraSettingsVisibility,setOkumuraSettingsVisibility]=useState(false); //Visibilidad de ajustes para Modelo Okumura
     const [okumuraValidInputs,setOkumuraValidInputs] = useState({txHeight: true, rxHeight: true, citySize:true, areaType:true})
@@ -322,6 +323,7 @@ export default function Home(){
             let freq=[];
             let frequencyLocal=0;
             let staticMode=false;
+            setStaticCsv(false);
 
             setDbPrediction([]);
 
@@ -333,13 +335,14 @@ export default function Home(){
                 rows[0].forEach(column => {
                     if (typeof column === 'string' && column.toLowerCase().includes('grado')) {
                         staticMode = true;
+                        setStaticCsv(true);
                     }
                 });
             }
             // console.log('Modo estatico:',staticMode);
 
             if(staticMode === false){  //Receptor con capturas variables, radios variables
-           
+                setStaticCsv(false);
                 for(let x=1;x<csvDataLong;x++){
                     
                     pot[x-1]=parseFloat(rows[x][0]);
@@ -655,6 +658,7 @@ useEffect(()=>{
                         <h3>Subir CSV para analisis</h3>
                         <input type='file' name ='file' accept='.csv' onChange={handleFileChange} className='inputFile'></input>    
                     </div>
+                    {staticCsv && <h3 className='staticCSVText'> Muestras tomadas a una misma distancia (radio) y ángulos (theta) equidistantes </h3>}
                     <div className='freqContainer'>
                         <h3>Frecuencia detectada: </h3>
                         <h3>{frequency ? `${frequency} MHz` : '-'}</h3>
@@ -793,7 +797,8 @@ useEffect(()=>{
                             <label>Ingrese una distancia de estimación (m):</label>
                             <input type='range' name='distancia' min={minDistancePrediction} max={maxDistancePrediction} step='0.5' value={distanceToScal} onChange={handleSliderChange} id='slideInput'></input>
                             <input type='textbox' id='inputTextBox' min={minDistancePrediction} max={maxDistancePrediction} value={distanceToScal} onChange={handleTextBoxChange}></input>
-                            <button id='predictionButton' onClick={handlePredictionClick}>Prediction</button>
+                             {` m. `} 
+                            <button id='predictionButton' onClick={handlePredictionClick}>PREDICTION</button>
                         </div>
                         
                     </div>
