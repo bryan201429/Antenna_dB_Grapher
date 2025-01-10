@@ -307,7 +307,10 @@ export default function Home(){
         if(dataCSV){
             setHeaders(dataCSV[0]);
             
-            const rows = dataCSV;
+            // const rows = dataCSV;
+            const rows = dataCSV.filter(row => 
+                row && Object.values(row).some(value => value !== null && value !== undefined && value !== '')
+            );
             const csvDataLong=rows.length;
             let temporal=0;
             let menor=0;
@@ -348,8 +351,8 @@ export default function Home(){
                     pot[x-1]=parseFloat(rows[x][0]);
                     lat[x-1]=rows[x][1];
                     lon[x-1]=rows[x][2];
-                    alt[x-1]=rows[x][3];
-                    freq[x-1]=rows[x][4];
+                    // alt[x-1]=rows[x][3];
+                    freq[x-1]=rows[x][3];
                 }
                 if(freq){
                     console.log('Frecuencia detectada:', freq[0])
@@ -399,8 +402,8 @@ export default function Home(){
             else if(staticMode === true){
                     for(let x=1;x<csvDataLong;x++){
                         pot[x-1]=parseFloat(rows[x][0]);
-                        alt[x-1]=rows[x][3];
-                        freq[x-1]=rows[x][4];
+                        // alt[x-1]=rows[x][3];
+                        freq[x-1]=rows[x][3];
                     }
                     for (let x=1; x<csvDataLong;x++){
                         dist[x-1]=rows[x][2];

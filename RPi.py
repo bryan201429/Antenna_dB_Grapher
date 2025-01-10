@@ -106,8 +106,8 @@ while bucle==True:
 
         	##!####CSV Escritura################
 			if csvContinuidad != 0:
-				fecha_hora_actual = datetime.datetime.now().strftime('%d-%m-%Y_%H:%M:%S')
-				file_path = f'./measures/F:{freqMhz}_DATE:{fecha_hora_actual}_0.csv'
+				fecha_hora_actual = datetime.datetime.now().strftime('%d-%m-%Y_%H_%M_%S')
+				file_path = f'./measures/F_{freqMhz}_DATE_{fecha_hora_actual}_0.csv'
 				
 			elif csvContinuidad == 0:
 				file_path = file_path
@@ -188,8 +188,8 @@ while bucle==True:
 
 	##!####CSV Escritura################
 		if csvContinuidad != 1:
-			fecha_hora_actual = datetime.datetime.now().strftime('%d-%m-%Y_%H:%M:%S')
-			file_path = f'./measures/F:{freqMhz}_DATE:{fecha_hora_actual}_1.csv'
+			fecha_hora_actual = datetime.datetime.now().strftime('%d-%m-%Y_%H_%M_%S')
+			file_path = f'./measures/F_{freqMhz}_DATE_{fecha_hora_actual}_1.csv'
 			
 		elif csvContinuidad == 1:
 			file_path = file_path
@@ -210,10 +210,67 @@ while bucle==True:
 			dictwriter_object.writerow(dict)
 			f_object.close()
 
-	if  entrada=='2':
-			grados=float(input("Ingrese cada cuantos grados(°) se hará la medición: "))
-			array_grados = [round(i, 2) for i in frange(0, 360, grados)] 
-			print(f"Array de grados: {array_grados}")
+
+
+	if entrada == '2':
+		grados = float(input("Ingrese cada cuantos grados (°) se hará la medición: "))
+		array_grados = [round(i, 2) for i in frange(0, 360, grados)] 
+		distStatic = input("Ingrese la distancia de la medición: ")
+		fecha_hora_actual = datetime.datetime.now().strftime('%d-%m-%Y_%H_%M_%S')
+		file_path = f'./measures/F_{freqMhz}_DATE_{fecha_hora_actual}_1.csv'
+		for i, valor in enumerate(array_grados):  # 'i' será el índice, 'valor' será el valor del ángulo
+		
+			# print(f"Muestra {i + 1}: {valor}")
+			input(f" Toma de muestra {i + 1} en {valor} °, presione una tecla para confirmar")
+			for x in range (0,muestras):
+				samples = sdr.read_samples(cant_muestras)
+				potencia = np.mean(np.abs(samples)**2)
+				pot_db = 10*np.log10(potencia)
+				print('POTENCIA PROM DE MUESTRAS: ',pot_db)
+				db_samples[x]=pot_db
+			print(db_samples)
+
+		##!###### ELIMINAR OUTLIERS ###########
+			d = np.abs(db_samples-np.median(db_samples))
+			mdev=np.median(d)
+			s=d/(mdev if mdev else 1.)
+			db_samples_not_outliers=[]
+			for i in range (len(db_samples)):
+				if s[i] <2:
+					db_samples_not_outliers.append(db_samples[i])
+				else:
+					continue
+
+		##!############ PROMEDIO ##############
+			for i in range (len(db_samples)):
+				promedio=promedio+db_samples[i]
+			promedio=promedio/muestras
+			promedio=0
+			for i in range (len(db_samples_not_outliers)):
+				promedio=promedio+db_samples_not_outliers[i]
+			promedio=promedio/len(db_samples_not_outliers)
+			print('Promedio de mediciones SIN OUTLIERS:', promedio)
+			#sdr.close()
+
+		##!####CSV Escritura################
+
+
+			csvContinuidad=2
+
+			headersCSV = ['Potencia','Grado','Distancia','Frequency']      #Lista de Columnas
+
+			dict={'Potencia':promedio,'Grado':valor ,'Distancia':distStatic,'Frequency':freqMhz}  #Data asignada al diccionario
+
+			mode = 'a' if os.path.exists(file_path) else 'w' # Modo de apertura 
+
+			with open(file_path, mode, newline='') as f_object:   #modo a de apendice
+				dictwriter_object = DictWriter(f_object, fieldnames=headersCSV)
+				if os.path.getsize(file_path) == 0:
+					dictwriter_object.writeheader()  # Escribir encabezados si está vacío
+
+				dictwriter_object.writerow(dict)
+
+
 
 	if  entrada=='3':
 		bucle=0
