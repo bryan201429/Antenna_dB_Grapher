@@ -270,7 +270,5 @@ while bucle==True:
 
 				dictwriter_object.writerow(dict)
 
-
-
 	if  entrada=='3':
 		bucle=0
