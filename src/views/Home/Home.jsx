@@ -23,6 +23,8 @@ export default function Home(){
     const [selectedModel,setSelectedModel]=useState(0); 
     const [staticCsv,setStaticCsv] = useState(false);
 
+    const [interEnabled,setInterEnabled] = useState(false);
+
     const [okumuraSettingsVisibility,setOkumuraSettingsVisibility]=useState(false); //Visibilidad de ajustes para Modelo Okumura
     const [okumuraValidInputs,setOkumuraValidInputs] = useState({txHeight: true, rxHeight: true, citySize:true, areaType:true})
     const [okumuraValueInputs,setOkumuraValueInputs] = useState({txHeight: undefined, rxHeight: undefined, citySize:undefined, areaType:undefined})
@@ -39,6 +41,7 @@ export default function Home(){
 
     const [minDistancePrediction,setMinDistancePrediction ]= useState(0);
     const [maxDistancePrediction,setMaxDistancePrediction ]= useState(10000);
+
 
     const c=2.99792458e8;
     const [frequency,setFrequency]=useState(undefined);
@@ -98,6 +101,11 @@ export default function Home(){
         }
         
     }
+    //! ///////////////////// INTERPOLATION ////////////////////////////////////////////
+
+    const handleCheckboxChange = (event) => {
+        setInterEnabled(event.target.checked); 
+      };
 
 
     //! ///////////////////// OKUMURA INPUTS ////////////////////////////////////////////
@@ -665,6 +673,25 @@ useEffect(()=>{
                         <h3>Frecuencia detectada: </h3>
                         <h3>{frequency ? `${frequency} MHz` : '-'}</h3>
 
+                    </div>
+                    <div className='interpolationBox'>
+                    <div className='interpolationEnableBox'>
+                        <h3>Interpolación</h3>
+                            <label className="toggleSwitch">
+                                <input type="checkbox" id="interpolationCheck" checked={interEnabled} onChange={handleCheckboxChange}/>
+                                <span className="slider"></span>
+                            </label>
+                        </div>
+                        {interEnabled && 
+                            <>
+                                <div className='interpolationPointsBox'>
+                                    Puntos de interpolación deseados:
+                                    <input id='interpolationPoints'/>
+                                </div>
+                                <button></button>
+                            </>
+                        }
+                        
                     </div>
                     <div className='propagationBox'>
                         <h3>Modelo de propagación</h3>
