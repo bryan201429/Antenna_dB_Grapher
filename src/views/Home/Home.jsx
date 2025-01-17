@@ -25,11 +25,12 @@ export default function Home(){
     const [staticCsv,setStaticCsv] = useState(false);
 
 
-    const [thetaBeforeSpline,setThetaBeforeSpline]=useState([]);
-    const [potDbScalBeforeSpline,setPotDbScalBeforeSpline]=useState([]);
-    const [distancesBeforeSpline,setDistancesBeforeSpline]=useState([]);
-    const [dbOriginalBeforeSpline,setDbOriginalBeforeSpline]=useState([]);
-    const [potTxEstimatedBeforeSpline,setPotTxEstimatedBeforeSpline]=useState([]);
+    const [thetaAfterSpline,setThetaAfterSpline]=useState([]);
+    const [potDbScalAfterSpline,setPotDbScalAfterSpline]=useState([]);
+    const [distancesAfterSpline,setDistancesAfterSpline]=useState([]);
+    const [dbOriginalAfterSpline,setDbOriginalAfterSpline]=useState([]);
+    const [potTxEstimatedAfterSpline,setPotTxEstimatedAfterSpline]=useState([]);
+    const [potPredictedAfterSpline,setPotPredictedAfterSpline]=useState([]);
 
     const [interEnabled,setInterEnabled] = useState(false);
     const [interNumber,setInterNumber] = useState(false);
@@ -60,11 +61,53 @@ export default function Home(){
                 type: 'scatterpolar',
                 r: [],
                 theta: [],
-                fill: 'toself'
+                fill: 'toself',
+                line: {
+                    color: '#FF5733',
+                    width: 3
+                  }
             }
         ]);
 
     const layout = {
+        polar: {
+            radialaxis: {
+                visible: true,
+                range: [minPotForScale-1, maxPotForScale+1],  // Rango del eje radial
+                tickfont: { color: 'white' },
+                gridcolor: 'white',
+                linecolor: 'white'
+            },
+            angularaxis: {
+                visible: true,
+                gridcolor: 'white', // Cambia el color de las líneas angulares
+                tickfont: { color: 'white' }, // Color de las etiquetas angulares
+                title: {
+                    text: 'Angular Axis',
+                    font: { color: 'white' }
+                }},
+            bgcolor:'rgba(30,30,30,0.9)',   // Fondo bajo el gráfico
+        },
+        showlegend: false,
+        autosize:true,
+        paper_bgcolor: 'rgba(30,30,30,0.9)', // Fondo general del gráfico
+        title:{
+            text: 'Radiation Pattern (Polar Plot) ',
+            font: { color: 'white' }
+
+        }
+    };
+
+    const [dataSpline,setDataSpline]=useState([
+        {
+            type: 'scatterpolar',
+            r: [],
+            theta: [],
+            fill: 'toself'
+        }
+    ]);
+
+    const layoutSpline = {
         polar: {
             radialaxis: {
                 visible: true,
@@ -73,11 +116,11 @@ export default function Home(){
         },
         showlegend: false,
         autosize:true,
-        bgcolor: 'lightblue',
+      
         title:{
             text: 'Radiation Pattern (Polar Plot) '
         }
-    };
+    };              
 
     const handleFileChange= async(e)=>{
         if(e.target.files){
@@ -126,7 +169,9 @@ export default function Home(){
         let splineTheta = [];
         let interpolatedValues = [];
         let interpolatedDbScaled = [];
-        let interpolatedDbPredicted = [];
+        let interpolatedDbPredicted = [];   
+        let interpolatedDistances = [];     // Distancias de muestreo original
+        let interpolatedPotOriginal = [];   // Muestras de potencia original
 
         for( let i=0; i<theta.length; i++){
             if(i!=theta.length-1){
@@ -144,27 +189,52 @@ export default function Home(){
             }
             
         }
-        console.log({splineTheta});
 
+        // for(let i=0; i<distances.length; i++){
+        //     interpolatedDistances.push(distances[i])
+        //     interpolatedDistances.push()
+
+        // }
+        console.log({splineTheta});
         const potenciaOrigenSpline = new cubicSpline(theta, potTxEstimated);    //Spline para Pot en Tx
         const potenciaDbScalSpline = new cubicSpline(theta, potDbScal);    
         const potenciaDbPredictSpline = new cubicSpline(theta,dbPrediction);
+        const distancesOriginalSplice = new cubicSpline(theta,distances);
+        const potOriginalSplice = new cubicSpline(theta,dbOriginal);
 
         for (let i=0; i<splineTheta.length ; i++){
             interpolatedValues.push(potenciaOrigenSpline.at(splineTheta[i])); // Método `at` para obtener un valor interpolado..
             interpolatedDbScaled.push(potenciaDbScalSpline.at(splineTheta[i])); // Método `at` para obtener un valor interpolado..
             interpolatedDbPredicted.push(potenciaDbPredictSpline.at(splineTheta[i])); // Método `at` para obtener un valor interpolado..
+            interpolatedDistances.push(distancesOriginalSplice.at(splineTheta[i])); // Método `at` para obtener un valor interpolado..
+            interpolatedPotOriginal.push(potOriginalSplice.at(splineTheta[i])); // Método `at` para obtener un valor interpolado..
         }
-        // setTheta(splineTheta);
-        // setPotTxEstimated(interpolatedValues);
-        // setPotDbScal(interpolatedDbScaled);
-        // setDbPrediction(interpolatedDbPredicted);
+        setThetaAfterSpline(splineTheta);
+        setPotDbScalAfterSpline(interpolatedDbScaled);
+        setDistancesAfterSpline(interpolatedDistances);
+        setDbOriginalAfterSpline(interpolatedPotOriginal);
+        setPotTxEstimatedAfterSpline(interpolatedValues);
+        setPotPredictedAfterSpline(interpolatedDbPredicted);
+
+        //! ////////////////////		GRAFICO SPLINE		////////////////
+
+        const datagraph = [
+            {   type: 'scatterpolar',
+                r: interpolatedDbScaled,
+                theta: splineTheta,
+                fill: 'toself',
+                line: {
+                    color: '#rgba(0,220,100,1)',
+                    width: 3
+                  }
+            }
+        ];
+        setDataSpline(datagraph);
 
         console.log({interpolatedValues});
     }
 
     //! ///////////////////// OKUMURA INPUTS ////////////////////////////////////////////
-
         const txAntennaChange = (e)=>{
             SetOkumuraReady(false);
             let txAntennaValue=Number(e.target.value)
@@ -201,7 +271,6 @@ export default function Home(){
             setOkumuraValueInputs((prev)=>({...prev, areaType: prev.areaType == option ? undefined : option,}))
         }
 
-
         const handleApply = () => {
             SetOkumuraReady(false);
             let validOkumuraFlag=true;
@@ -216,16 +285,13 @@ export default function Home(){
             }
             if(validOkumuraFlag == false){
                 SetokumuraErrorFlag(true);  //Mostrar errorModal
-            }
-            else if(validOkumuraFlag == true){
+            }else if(validOkumuraFlag == true){
                 SetOkumuraReady(true);
             }
         }
         
-
     //! /////////////////////////// Predicción /////////////////////////////////////////////////
             //! ///////////////////// OKUMURA INPUTS ////////////////////////////////////////////
-
                 const txAntennaChangePrediction = (e)=>{
                     SetOkumuraReadyPrediction(false);
                     let txAntennaValue=Number(e.target.value)
@@ -244,13 +310,11 @@ export default function Home(){
                     if(rxAntennaValue<1 || rxAntennaValue>10){
                         setOkumuraValidInputsPrediction((prev)=>({...prev, rxHeight:false}))
                         setOkumuraValueInputsPrediction((prev)=>({...prev, rxHeight:rxAntennaValue}))
-                    }
-                    else{
+                    }else{
                         setOkumuraValidInputsPrediction((prev)=>({...prev, rxHeight:true}))
                         setOkumuraValueInputsPrediction((prev)=>({...prev, rxHeight:rxAntennaValue}))
                         }
                 }
-        
                 const citySizeChangePrediction = (option)=>{
                     SetOkumuraReadyPrediction(false);
                     setOkumuraValidInputsPrediction((prev)=>({...prev, citySize:true}))
@@ -277,8 +341,7 @@ export default function Home(){
                     }
                     if(validOkumuraFlag == false){
                         SetokumuraErrorFlagPrediction(true);  //Mostrar errorModal
-                    }
-                    else if(validOkumuraFlag == true){
+                    }else if(validOkumuraFlag == true){
                         SetOkumuraReadyPrediction(true);
                     }
                     console.log('Apply button:',{okumuraValueInputsPrediction},{okumuraValidInputsPrediction},{validOkumuraFlag})
@@ -576,7 +639,7 @@ export default function Home(){
                 const combinedData = ang.map((value, index) => ({
                     ang: Number(value),
                     dbScal: listadbscal[index],
-                    dist: dist[index],
+                    dist: Number(dist[index]),
                     pot: listaDbOrig[index],
                     potEst: potEstOrigen[index],
                 }));
@@ -598,11 +661,11 @@ export default function Home(){
                 setDbOriginal(potSorted);
                 setPotTxEstimated(potEstSorted);
 
-                setThetaBeforeSpline(angSorted);
-                setPotDbScalBeforeSpline(dbScalSorted);
-                setDistancesBeforeSpline(distSorted);
-                setDbOriginalBeforeSpline(potSorted);
-                setPotTxEstimatedBeforeSpline(potEstSorted);
+                // setThetaAfterSpline(angSorted);
+                // setPotDbScalAfterSpline(dbScalSorted);
+                // setDistancesAfterSpline(distSorted);
+                // setDbOriginalAfterSpline(potSorted);
+                // setPotTxEstimatedAfterSpline(potEstSorted);
 
                 // Calcula y establece los valores máximo y mínimo de la potencia escalada
                 setMaxPotForScale(Math.max(...dbScalSorted));
@@ -619,7 +682,11 @@ export default function Home(){
                 {   type: 'scatterpolar',
                     r: dbScalSorted,
                     theta: angSorted,
-                    fill: 'toself'
+                    fill: 'toself',
+                    line: {
+                        color: '#rgba(250,70,0,1)',
+                        width: 2
+                      }
                 }
             ];
             setData(datagraph);
@@ -830,21 +897,24 @@ useEffect(()=>{
                     </div>
                     
                 </div>
-                <Plot
-                    data={data}
-                    layout={layout}
-                    config={{ responsive: true, useResizeHandler:true }}
-                    useResizeHandler={true}
-                    className='plotChart'
-                />
+                
             </div>
             
+            <div className='tablesContainer'>
 
+            
                 <div className='tableContainer'>
+                    <Plot
+                        data={data}
+                        layout={layout}
+                        config={{ responsive: true, useResizeHandler:true }}
+                        useResizeHandler={true}
+                        className='plotChart'
+                    />
                     <table className='dataTable'>
                         <thead>
                             <th>Sample</th>
-                            <th>Theta</th>
+                            <th>Theta (°)</th>
                             <th>Dist. Original</th>
                             <th>Pot. Medida</th>
                             <th>Pot. Estimada en Origen</th>
@@ -857,8 +927,8 @@ useEffect(()=>{
                                 return( 
                                 <tr key={i}>
                                     <td>{i}</td>
-                                    <td>{theta[i]}</td> 
-                                    <td>{distances[i]}</td> 
+                                    <td>{theta[i].toFixed(3)}</td> 
+                                    <td>{distances[i].toFixed(3)}</td> 
                                     <td>{dbOriginal[i]}</td> 
                                     <td>{potTxEstimated[i]}</td>
                                     <td>{potDbScal[i]}</td> 
@@ -870,7 +940,45 @@ useEffect(()=>{
                         </tbody>
                     </table>
                 </div>
+                <div className='tableContainer'>
+                    <Plot
+                        data={dataSpline}
+                        layout={layout}
+                        config={{ responsive: true, useResizeHandler:true }}
+                        useResizeHandler={true}
+                        className='plotChart'
+                    />
+                    <table className='dataTable'>
+                            <thead>
+                                <th>Sample</th>
+                                <th>Theta (°)</th>
+                                <th>Dist. Original</th>
+                                <th>Pot. Medida</th>
+                                <th>Pot. Estimada en Origen</th>
+                                <th>Potencia Escalada en Distancia. Maxima: {`${maxDistance} metros`}</th>
+                                <th>PotPredicted</th>
+
+                            </thead>
+                            <tbody> 
+                                {thetaAfterSpline&&thetaAfterSpline.map((column,i)=>{
+                                    return( 
+                                    <tr key={i}>
+                                        <td>{i}</td>
+                                        <td>{thetaAfterSpline[i].toFixed(3)}</td> 
+                                        <td>{distancesAfterSpline[i].toFixed(3)}</td> 
+                                        <td>{dbOriginalAfterSpline[i]}</td> 
+                                        <td>{potTxEstimatedAfterSpline[i]}</td>
+                                        <td>{potDbScalAfterSpline[i]}</td> 
+                                        <td>{potPredictedAfterSpline[i]}</td> 
+                                    </tr>
+                                    )
+                                })}
+
+                            </tbody>
+                        </table>
+                    </div>
                </div>
+            </div>
             {okumuraErrorFlag && <ErrorModal errorFlag={okumuraErrorFlag} message="Verificar los datos del modelo de Okumura" setErrorFlag={SetokumuraErrorFlag}/>}
             {okumuraErrorFlagPrediction && <ErrorModal errorFlag={okumuraErrorFlagPrediction} message="Verificar datos para Predicción" setErrorFlag={SetokumuraErrorFlagPrediction}/>}
         </div>
