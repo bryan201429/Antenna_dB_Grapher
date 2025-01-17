@@ -201,7 +201,16 @@ input[type=file]::file-selector-button {
 .interpolationPointsBox{
     display: flex;
     justify-content: space-between;
+    margin-bottom: 10px;
+
 }
+#interpolButton{
+    background-color: rgb(26, 161, 105);
+    border: 0;
+    border-radius: 3px;
+    font-size: 1em;
+}
+
 .selectModelPropagation{
     display: flex;
     justify-content: space-between;

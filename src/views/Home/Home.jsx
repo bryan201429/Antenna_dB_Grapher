@@ -2,7 +2,8 @@ import './Home.css'
 import { useEffect, useState } from 'react';
 import React from 'react';
 import Plot from 'react-plotly.js';
-import ErrorModal from '../../components/errorModal/ErrorModal'
+import ErrorModal from '../../components/errorModal/ErrorModal';
+import cubicSpline from 'cubic-spline';
 
 export default function Home(){
     const [dataCSV,setDataCSV]=useState(); 
@@ -23,7 +24,15 @@ export default function Home(){
     const [selectedModel,setSelectedModel]=useState(0); 
     const [staticCsv,setStaticCsv] = useState(false);
 
+
+    const [thetaBeforeSpline,setThetaBeforeSpline]=useState([]);
+    const [potDbScalBeforeSpline,setPotDbScalBeforeSpline]=useState([]);
+    const [distancesBeforeSpline,setDistancesBeforeSpline]=useState([]);
+    const [dbOriginalBeforeSpline,setDbOriginalBeforeSpline]=useState([]);
+    const [potTxEstimatedBeforeSpline,setPotTxEstimatedBeforeSpline]=useState([]);
+
     const [interEnabled,setInterEnabled] = useState(false);
+    const [interNumber,setInterNumber] = useState(false);
 
     const [okumuraSettingsVisibility,setOkumuraSettingsVisibility]=useState(false); //Visibilidad de ajustes para Modelo Okumura
     const [okumuraValidInputs,setOkumuraValidInputs] = useState({txHeight: true, rxHeight: true, citySize:true, areaType:true})
@@ -107,6 +116,63 @@ export default function Home(){
         setInterEnabled(event.target.checked); 
       };
 
+    const handleInputInterpolChange = (event) =>{
+        setInterNumber(event.target.value)
+        
+
+    }
+    const handleApplyInterpol = (event) =>{
+        console.log({theta},{distances},{dbOriginal},{potTxEstimated},{potDbScal},{dbPrediction});
+        let splineTheta = [];
+        let interpolatedValues = [];
+        let interpolatedDbScaled = [];
+        let interpolatedDbPredicted = [];
+
+        for( let i=0; i<theta.length; i++){
+            if(i!=theta.length-1){
+                let delta = (theta[i+1]-theta[i])/(Number(interNumber)+1);
+                console.log('delta', delta);
+                splineTheta.push(theta[i]);
+                for(let j=1 ; j<=interNumber; j++ ){
+                    splineTheta.push(theta[i]+delta*j);
+                } 
+            }
+            else{
+                if(i == (theta.length-1)){
+                    splineTheta.push(theta[i]);
+                }
+            }
+            
+        }
+        console.log({splineTheta});
+
+        const potenciaOrigenSpline = new cubicSpline(theta, potTxEstimated);    //Spline para Pot en Tx
+        const potenciaDbScalSpline = new cubicSpline(theta, potDbScal);    
+        const potenciaDbPredictSpline = new cubicSpline(theta,dbPrediction);
+
+        for (let i=0; i<splineTheta.length ; i++){
+            interpolatedValues.push(potenciaOrigenSpline.at(splineTheta[i])); // Método `at` para obtener un valor interpolado..
+            interpolatedDbScaled.push(potenciaDbScalSpline.at(splineTheta[i])); // Método `at` para obtener un valor interpolado..
+            interpolatedDbPredicted.push(potenciaDbPredictSpline.at(splineTheta[i])); // Método `at` para obtener un valor interpolado..
+        }
+        // setTheta(splineTheta);
+        // setPotTxEstimated(interpolatedValues);
+        // setPotDbScal(interpolatedDbScaled);
+        // setDbPrediction(interpolatedDbPredicted);
+
+        // //? ///////////////		GRAFICO POLAR		////////////////
+        //     const datagraph = [     
+        //         {
+        //             type: 'scatterpolar',
+        //             r: interpolatedDbScaled,
+        //             theta: splineTheta,
+        //             fill: 'toself'
+        //         }
+        //     ];
+        //     setData(datagraph);
+
+        console.log({interpolatedValues});
+    }
 
     //! ///////////////////// OKUMURA INPUTS ////////////////////////////////////////////
 
@@ -148,10 +214,8 @@ export default function Home(){
 
 
         const handleApply = () => {
-            // console.log('Apply button:',{okumuraValueInputs},{okumuraValidInputs})
             SetOkumuraReady(false);
             let validOkumuraFlag=true;
-
             if(okumuraValueInputs.txHeight==undefined ||okumuraValidInputs.txHeight==false){
                 validOkumuraFlag=false;
             }
@@ -170,14 +234,7 @@ export default function Home(){
         }
         
 
-        useEffect(()=>{
-            console.log({okumuraValueInputs})
-            console.log({okumuraReady})
-        },[okumuraReady])
-
-
     //! /////////////////////////// Predicción /////////////////////////////////////////////////
-
             //! ///////////////////// OKUMURA INPUTS ////////////////////////////////////////////
 
                 const txAntennaChangePrediction = (e)=>{
@@ -218,10 +275,8 @@ export default function Home(){
         
         
                 const handleApplyPrediction = () => {
-                    
                     SetOkumuraReadyPrediction(false);
                     let validOkumuraFlag=true;
-        
                     if(okumuraValueInputsPrediction.txHeight==undefined ||okumuraValidInputsPrediction.txHeight==false){
                         validOkumuraFlag=false;
                     }
@@ -240,7 +295,6 @@ export default function Home(){
                     console.log('Apply button:',{okumuraValueInputsPrediction},{okumuraValidInputsPrediction},{validOkumuraFlag})
                 }
                 
-        
                 useEffect(()=>{
                     console.log({okumuraValueInputsPrediction})
                     console.log({okumuraReadyPrediction})
@@ -259,7 +313,6 @@ export default function Home(){
 
          pots = pots.map((pot) => {
 
-
             if(selectedModelPrediction===0){          //!FSPL
                 console.log('Prediction FSPL',frequency*10**6)
                 if(Math.abs(distPrediction) < (c/(frequency*10**6))/(4 * Math.PI )){
@@ -271,7 +324,6 @@ export default function Home(){
                 }
             }
             else if(selectedModelPrediction===1){     //!OKUMURA
-
                 if(okumuraReadyPrediction){
                     console.log('Prediciendo okumura')
                     if(okumuraValueInputsPrediction.citySize==1){ // ciudad pequeña,mediana
@@ -292,19 +344,13 @@ export default function Home(){
                                 K=4.78*(Math.log10(frequency))**2 - (18.3*(Math.log10(frequency))) + 40.94
                             }
                         }
-
-
                     L=69.55 + 26.16*Math.log10(frequency) - 13.82*Math.log10(okumuraValueInputsPrediction.txHeight) - ahm + (44.9-6.55*Math.log10(okumuraValueInputsPrediction.txHeight))*Math.log10(Math.abs(distPrediction)/1000);
                     pot = pot - (L - K);
-
-                    
                 }
             }
             return pot;
         });
         setDbPrediction(pots);
-       
-
     }
 
     //! ///////////////////////////////////////////////////////////////
@@ -313,8 +359,6 @@ export default function Home(){
         
         if(dataCSV){
             setHeaders(dataCSV[0]);
-            
-            // const rows = dataCSV;
             const rows = dataCSV.filter(row => 
                 row && Object.values(row).some(value => value !== null && value !== undefined && value !== '')
             );
@@ -334,7 +378,6 @@ export default function Home(){
             let frequencyLocal=0;
             let staticMode=false;
             setStaticCsv(false);
-
             setDbPrediction([]);
 
 
@@ -354,7 +397,6 @@ export default function Home(){
             if(staticMode === false){  //Receptor con capturas variables, radios variables
                 setStaticCsv(false);
                 for(let x=1;x<csvDataLong;x++){
-                    
                     pot[x-1]=parseFloat(rows[x][0]);
                     lat[x-1]=rows[x][1];
                     lon[x-1]=rows[x][2];
@@ -540,49 +582,10 @@ export default function Home(){
             // console.log('Angulos NO ordenados: ',ang);
 
         //! ///////////////////////// ORDENAR ARRAYS SEGUN ANGULOS DE FORMA ASCENDENTE /////////////////////////////////////
-            // menor = 1000;
-            // let dbScalTemp = 0;
-            // let distTemp = 0;
-            // let potTemp = 0;
-            // let potEstTemp = 0;
-            // for(let j=0; j<csvDataLong-1;j++){ // Recorre el array incrementando el indice de inicio cada vez (el indice menor tiene el numero menor)
-            //     for(let i=j;i<csvDataLong-1;i++){
-            //         if(ang[i]<menor){
-            //             menor=ang[i];
-            //             menorpos=i;
-            //         } }
-            //     temporal=ang[j];
-            //     ang[j]=menor;        // Se asigna el valor menor a la posicion 0 del array
-            //     ang[menorpos]=temporal; //Se intercambia el menor valor 
-
-            //     dbScalTemp = listadbscal[j];
-            //     listadbscal[j] = listadbscal[menorpos];
-            //     listadbscal[menorpos] = dbScalTemp;
-
-            //     potEstTemp = potEstOrigen[j];
-            //     potEstOrigen[j] = potEstOrigen[menorpos];
-            //     potEstOrigen[menorpos] = potEstTemp;
-
-            //     distTemp = dist[j];
-            //     dist[j] = dist[menorpos];
-            //     dist[menorpos] = distTemp;
-
-            //     potTemp = listaDbOrig[j];
-            //     listaDbOrig[j] = listaDbOrig[menorpos];
-            //     listaDbOrig[menorpos] = potTemp;
-            //     menor = 5000;
-            // }
-            // setTheta(ang);
-            // setPotDbScal(listadbscal);
-            // setDistances(dist);
-            // setDbOriginal(listaDbOrig); 
-            // setPotTxEstimated(potEstOrigen);
-            // setMaxPotForScale(Math.max(...listadbscal));
-            // setMinPotForScale(Math.min(...listadbscal));
-
+          
             // Combina los arrays en un solo array de objetos para mantener la relación entre ellos
                 const combinedData = ang.map((value, index) => ({
-                    ang: value,
+                    ang: Number(value),
                     dbScal: listadbscal[index],
                     dist: dist[index],
                     pot: listaDbOrig[index],
@@ -606,6 +609,12 @@ export default function Home(){
                 setDbOriginal(potSorted);
                 setPotTxEstimated(potEstSorted);
 
+                setThetaBeforeSpline(angSorted);
+                setPotDbScalBeforeSpline(dbScalSorted);
+                setDistancesBeforeSpline(distSorted);
+                setDbOriginalBeforeSpline(potSorted);
+                setPotTxEstimatedBeforeSpline(potEstSorted);
+
                 // Calcula y establece los valores máximo y mínimo de la potencia escalada
                 setMaxPotForScale(Math.max(...dbScalSorted));
                 setMinPotForScale(Math.min(...dbScalSorted));
@@ -618,8 +627,7 @@ export default function Home(){
             //! ////////////////////		GRAFICO POLAR		////////////////
 
             const datagraph = [
-                {
-                    type: 'scatterpolar',
+                {   type: 'scatterpolar',
                     r: dbScalSorted,
                     theta: angSorted,
                     fill: 'toself'
@@ -686,9 +694,9 @@ useEffect(()=>{
                             <>
                                 <div className='interpolationPointsBox'>
                                     Puntos de interpolación deseados:
-                                    <input id='interpolationPoints'/>
+                                    <input id='interpolationPoints' type="number" onChange={handleInputInterpolChange}/>
                                 </div>
-                                <button></button>
+                                <button id='interpolButton' onClick={handleApplyInterpol}>Aplicar Interpolación </button>
                             </>
                         }
                         
@@ -849,10 +857,10 @@ useEffect(()=>{
                             <th>Sample</th>
                             <th>Theta</th>
                             <th>Dist. Original</th>
-                            <th>Dist. Escalada</th>
+                            {/* <th>Dist. Escalada</th> */}
                             <th>Pot. Medida</th>
                             <th>Pot. Estimada en Origen</th>
-                            <th>Potencia Escalada</th>
+                            <th>Potencia Escalada en Distancia. Maxima: {`${maxDistance} metros`}</th>
                             <th>PotPredicted</th>
 
                         </thead>
@@ -863,7 +871,7 @@ useEffect(()=>{
                                     <td>{i}</td>
                                     <td>{theta[i]}</td> 
                                     <td>{distances[i]}</td> 
-                                    <td>{maxDistance}</td> 
+                                    {/* <td>{maxDistance}</td>  */}
                                     <td>{dbOriginal[i]}</td> 
                                     <td>{potTxEstimated[i]}</td>
                                     <td>{potDbScal[i]}</td> 
