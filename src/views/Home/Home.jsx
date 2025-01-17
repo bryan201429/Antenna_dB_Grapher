@@ -33,6 +33,7 @@ export default function Home(){
 
     const [interEnabled,setInterEnabled] = useState(false);
     const [interNumber,setInterNumber] = useState(false);
+    const [interReady,setInterReady] = useState(false);
 
     const [okumuraSettingsVisibility,setOkumuraSettingsVisibility]=useState(false); //Visibilidad de ajustes para Modelo Okumura
     const [okumuraValidInputs,setOkumuraValidInputs] = useState({txHeight: true, rxHeight: true, citySize:true, areaType:true})
@@ -118,10 +119,9 @@ export default function Home(){
 
     const handleInputInterpolChange = (event) =>{
         setInterNumber(event.target.value)
-        
-
     }
     const handleApplyInterpol = (event) =>{
+        setInterReady(true);
         console.log({theta},{distances},{dbOriginal},{potTxEstimated},{potDbScal},{dbPrediction});
         let splineTheta = [];
         let interpolatedValues = [];
@@ -159,17 +159,6 @@ export default function Home(){
         // setPotTxEstimated(interpolatedValues);
         // setPotDbScal(interpolatedDbScaled);
         // setDbPrediction(interpolatedDbPredicted);
-
-        // //? ///////////////		GRAFICO POLAR		////////////////
-        //     const datagraph = [     
-        //         {
-        //             type: 'scatterpolar',
-        //             r: interpolatedDbScaled,
-        //             theta: splineTheta,
-        //             fill: 'toself'
-        //         }
-        //     ];
-        //     setData(datagraph);
 
         console.log({interpolatedValues});
     }
@@ -690,15 +679,15 @@ useEffect(()=>{
                                 <span className="slider"></span>
                             </label>
                         </div>
-                        {interEnabled && 
-                            <>
+                        
+
                                 <div className='interpolationPointsBox'>
                                     Puntos de interpolación deseados:
                                     <input id='interpolationPoints' type="number" onChange={handleInputInterpolChange}/>
                                 </div>
                                 <button id='interpolButton' onClick={handleApplyInterpol}>Aplicar Interpolación </button>
-                            </>
-                        }
+
+                        
                         
                     </div>
                     <div className='propagationBox'>
@@ -857,7 +846,6 @@ useEffect(()=>{
                             <th>Sample</th>
                             <th>Theta</th>
                             <th>Dist. Original</th>
-                            {/* <th>Dist. Escalada</th> */}
                             <th>Pot. Medida</th>
                             <th>Pot. Estimada en Origen</th>
                             <th>Potencia Escalada en Distancia. Maxima: {`${maxDistance} metros`}</th>
@@ -871,7 +859,6 @@ useEffect(()=>{
                                     <td>{i}</td>
                                     <td>{theta[i]}</td> 
                                     <td>{distances[i]}</td> 
-                                    {/* <td>{maxDistance}</td>  */}
                                     <td>{dbOriginal[i]}</td> 
                                     <td>{potTxEstimated[i]}</td>
                                     <td>{potDbScal[i]}</td> 
