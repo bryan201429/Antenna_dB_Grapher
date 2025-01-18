@@ -748,11 +748,11 @@ useEffect(()=>{
                     </div>
                     <div className='interpolationBox'>
                     <div className='interpolationEnableBox'>
-                        <h3>Interpolación</h3>
-                            <label className="toggleSwitch">
+                        <h3 >Interpolación</h3>
+                            {/* <label className="toggleSwitch">
                                 <input type="checkbox" id="interpolationCheck" checked={interEnabled} onChange={handleCheckboxChange}/>
                                 <span className="slider"></span>
-                            </label>
+                            </label> */}
                         </div>
                         
 

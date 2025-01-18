@@ -190,8 +190,14 @@ input[type=file]::file-selector-button {
     width: 100%;
     padding-top: 5px;
     padding: 5px;
-    border: solid 1px;
+    border-top: solid 1px;
+    border-bottom: solid 1px;
     box-sizing: border-box;
+    padding: 0;
+}
+.propagationBox h3{
+    margin-bottom: 2px;
+    margin-top: 2px;
 }
 .predictionBox{
     display: flex;
@@ -201,23 +207,33 @@ input[type=file]::file-selector-button {
     width: 100%;
     padding-top: 5px;
     padding-bottom: 10px;
-    border: solid 1px;
+    border-top: solid 1px;
+    border-bottom: solid 1px;
     box-sizing: border-box;
 }
 .interpolationBox{
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: space-evenly;
     width: 100%;
-    padding-top: 5px;
-    padding: 5px;
-    border: solid 1px;
+    padding-bottom: 5px;
+    border-top: solid 1px;
+    border-bottom: solid 1px;
     box-sizing: border-box;
 }
 .interpolationEnableBox{
     display: flex;
     justify-content: space-between;
     align-items: center;
+    /* background-color: red; */
+    margin: 0;
+    padding: 0;
+    max-height: fit-content;
+}
+.interpolationEnableBox h3{
+    padding: 0;
+    margin-bottom: 5px;
+    margin-top: 5px;
 }
 .interpolationPointsBox{
     display: flex;
@@ -237,6 +253,12 @@ input[type=file]::file-selector-button {
     justify-content: space-between;
     align-items: center;
     width: 100%;
+}
+.selectModelPropagation h4{
+    padding: 0;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    font-weight:400
 }
 .tableContainer{
     width: fit-content;
