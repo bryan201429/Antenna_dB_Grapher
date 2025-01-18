@@ -15,7 +15,7 @@ export default function Home(){
     const [dbPrediction,setDbPrediction]=useState([]);
     const [distances,setDistances]=useState([]);
     const [maxPotForScale,setMaxPotForScale]=useState(20);
-    const [minPotForScale,setMinPotForScale]=useState(-20);
+    const [minPotForScale,setMinPotForScale]=useState(-50);
     const [maxDistance,setMaxDistance]=useState(0);
     const [minDistance,setMinDistance]=useState(0);
     const [okumuraCompatible,setOkumuraCompatible]=useState(false);
@@ -69,34 +69,46 @@ export default function Home(){
             }
         ]);
 
-    const layout = {
-        polar: {
-            radialaxis: {
-                visible: true,
-                range: [minPotForScale-1, maxPotForScale+1],  // Rango del eje radial
-                tickfont: { color: 'white' },
-                gridcolor: 'white',
-                linecolor: 'white'
+        const layout = {
+            polar: {
+                radialaxis: {
+                    visible: true,
+                    range: [minPotForScale , maxPotForScale +0.5], // Rango inicial del eje radial
+                    tickfont: { color: 'white' },
+                    gridcolor: 'white',
+                    linecolor: 'white',
+                },
+                angularaxis: {
+                    visible: true,
+                    gridcolor: 'white',
+                    tickfont: { color: 'white' },
+                    title: {
+                        text: 'Angular Axis',
+                        font: { color: 'white' }
+                    },
+                },
+                bgcolor: 'rgba(30,30,30,0.9)', // Fondo bajo el gráfico
             },
-            angularaxis: {
-                visible: true,
-                gridcolor: 'white', // Cambia el color de las líneas angulares
-                tickfont: { color: 'white' }, // Color de las etiquetas angulares
-                title: {
-                    text: 'Angular Axis',
-                    font: { color: 'white' }
-                }},
-            bgcolor:'rgba(30,30,30,0.9)',   // Fondo bajo el gráfico
-        },
-        showlegend: false,
-        autosize:true,
-        paper_bgcolor: 'rgba(30,30,30,0.9)', // Fondo general del gráfico
-        title:{
-            text: 'Radiation Pattern (Polar Plot) ',
-            font: { color: 'white' }
-
-        }
-    };
+            showlegend: false,
+            autosize: true,
+            paper_bgcolor: 'rgba(30,30,30,0.9)', // Fondo general del gráfico
+            title: {
+                text: 'Radiation Pattern (Polar Plot)',
+                font: { color: 'white' }
+            },
+            hovermode: 'closest',
+            hoverlabel: {
+                bgcolor: '#444',
+                font: {
+                    color: 'white',
+                    size: 12,
+                },
+            },
+            dragmode: 'zoom',  // Asegúrate de que el dragmode esté activado
+            
+        };
+        
+        
 
     const [dataSpline,setDataSpline]=useState([
         {
@@ -107,20 +119,6 @@ export default function Home(){
         }
     ]);
 
-    const layoutSpline = {
-        polar: {
-            radialaxis: {
-                visible: true,
-                range: [minPotForScale-1, maxPotForScale+1]  // Rango del eje radial
-            }
-        },
-        showlegend: false,
-        autosize:true,
-      
-        title:{
-            text: 'Radiation Pattern (Polar Plot) '
-        }
-    };              
 
     const handleFileChange= async(e)=>{
         if(e.target.files){
@@ -165,50 +163,57 @@ export default function Home(){
     }
     const handleApplyInterpol = (event) =>{
         setInterReady(true);
-        console.log({theta},{distances},{dbOriginal},{potTxEstimated},{potDbScal},{dbPrediction});
+        console.log({ theta }, { distances }, { dbOriginal }, { potTxEstimated }, { potDbScal }, { dbPrediction });
+    
         let splineTheta = [];
         let interpolatedValues = [];
         let interpolatedDbScaled = [];
-        let interpolatedDbPredicted = [];   
-        let interpolatedDistances = [];     // Distancias de muestreo original
-        let interpolatedPotOriginal = [];   // Muestras de potencia original
-
-        for( let i=0; i<theta.length; i++){
-            if(i!=theta.length-1){
-                let delta = (theta[i+1]-theta[i])/(Number(interNumber)+1);
-                console.log('delta', delta);
+        let interpolatedDbPredicted = [];
+        let interpolatedDistances = [];
+        let interpolatedPotOriginal = [];
+    
+        // Interpolación dentro del rango definido
+        for (let i = 0; i < theta.length; i++) {
+            if (i != theta.length - 1) {
+                let delta = (theta[i + 1] - theta[i]) / (Number(interNumber) + 1);
                 splineTheta.push(theta[i]);
-                for(let j=1 ; j<=interNumber; j++ ){
-                    splineTheta.push(theta[i]+delta*j);
-                } 
-            }
-            else{
-                if(i == (theta.length-1)){
-                    splineTheta.push(theta[i]);
+                for (let j = 1; j <= interNumber; j++) {
+                    splineTheta.push(theta[i] + delta * j);
                 }
+            } else {    // Agregar el último valor de theta
+                
+                splineTheta.push(theta[i]);
             }
-            
         }
-
-        // for(let i=0; i<distances.length; i++){
-        //     interpolatedDistances.push(distances[i])
-        //     interpolatedDistances.push()
-
-        // }
-        console.log({splineTheta});
-        const potenciaOrigenSpline = new cubicSpline(theta, potTxEstimated);    //Spline para Pot en Tx
-        const potenciaDbScalSpline = new cubicSpline(theta, potDbScal);    
-        const potenciaDbPredictSpline = new cubicSpline(theta,dbPrediction);
-        const distancesOriginalSplice = new cubicSpline(theta,distances);
-        const potOriginalSplice = new cubicSpline(theta,dbOriginal);
-
-        for (let i=0; i<splineTheta.length ; i++){
-            interpolatedValues.push(potenciaOrigenSpline.at(splineTheta[i])); // Método `at` para obtener un valor interpolado..
-            interpolatedDbScaled.push(potenciaDbScalSpline.at(splineTheta[i])); // Método `at` para obtener un valor interpolado..
-            interpolatedDbPredicted.push(potenciaDbPredictSpline.at(splineTheta[i])); // Método `at` para obtener un valor interpolado..
-            interpolatedDistances.push(distancesOriginalSplice.at(splineTheta[i])); // Método `at` para obtener un valor interpolado..
-            interpolatedPotOriginal.push(potOriginalSplice.at(splineTheta[i])); // Método `at` para obtener un valor interpolado..
+    
+        // Interpolación entre el último y el primer punto
+        const lastTheta = theta[theta.length - 1];
+        const firstTheta = theta[0] + 360; // Asegurar la continuidad circular
+        let deltaClosing = (firstTheta - lastTheta) / (Number(interNumber) + 1);
+        for (let j = 1; j <= interNumber; j++) {
+            splineTheta.push(lastTheta + deltaClosing * j);
         }
+    
+        // Asegurarse de que los valores de theta sean cíclicos (0-360°)
+        splineTheta = splineTheta.map((angle) => angle % 360);
+    
+        // Generar splines para cada conjunto de datos
+        const potenciaOrigenSpline = new cubicSpline([...theta, theta[0] + 360], [...potTxEstimated, potTxEstimated[0]]);
+        const potenciaDbScalSpline = new cubicSpline([...theta, theta[0] + 360], [...potDbScal, potDbScal[0]]);
+        const potenciaDbPredictSpline = new cubicSpline([...theta, theta[0] + 360], [...dbPrediction, dbPrediction[0]]);
+        const distancesOriginalSplice = new cubicSpline([...theta, theta[0] + 360], [...distances, distances[0]]);
+        const potOriginalSplice = new cubicSpline([...theta, theta[0] + 360], [...dbOriginal, dbOriginal[0]]);
+    
+        // Calcular los valores interpolados
+        for (let i = 0; i < splineTheta.length; i++) {
+            interpolatedValues.push(potenciaOrigenSpline.at(splineTheta[i]));
+            interpolatedDbScaled.push(potenciaDbScalSpline.at(splineTheta[i]));
+            interpolatedDbPredicted.push(potenciaDbPredictSpline.at(splineTheta[i]));
+            interpolatedDistances.push(distancesOriginalSplice.at(splineTheta[i]));
+            interpolatedPotOriginal.push(potOriginalSplice.at(splineTheta[i]));
+        }
+    
+        // Actualizar los estados con los resultados
         setThetaAfterSpline(splineTheta);
         setPotDbScalAfterSpline(interpolatedDbScaled);
         setDistancesAfterSpline(interpolatedDistances);
@@ -217,16 +222,25 @@ export default function Home(){
         setPotPredictedAfterSpline(interpolatedDbPredicted);
 
         //! ////////////////////		GRAFICO SPLINE		////////////////
-
         const datagraph = [
             {   type: 'scatterpolar',
                 r: interpolatedDbScaled,
                 theta: splineTheta,
+                mode: 'lines+markers',
                 fill: 'toself',
                 line: {
                     color: '#rgba(0,220,100,1)',
                     width: 3
-                  }
+                  },
+                  hoverinfo: 'r+theta+name', // Incluye el nombre para más contexto
+                //   name: 'I + theta', // Nombre que aparecerá en el hover
+                //   hoverlabel: {
+                //       bgcolor: '#000', // Fondo del cuadro de hover
+                //       font: {
+                //           color: '#FFF', // Color del texto en el hover
+                //           size: 12 // Tamaño de fuente del hover
+                //       }
+                //   }
             }
         ];
         setDataSpline(datagraph);
@@ -661,15 +675,9 @@ export default function Home(){
                 setDbOriginal(potSorted);
                 setPotTxEstimated(potEstSorted);
 
-                // setThetaAfterSpline(angSorted);
-                // setPotDbScalAfterSpline(dbScalSorted);
-                // setDistancesAfterSpline(distSorted);
-                // setDbOriginalAfterSpline(potSorted);
-                // setPotTxEstimatedAfterSpline(potEstSorted);
-
                 // Calcula y establece los valores máximo y mínimo de la potencia escalada
-                setMaxPotForScale(Math.max(...dbScalSorted));
-                setMinPotForScale(Math.min(...dbScalSorted));
+                setMaxPotForScale(Number(Math.max(...dbScalSorted)));
+                setMinPotForScale(Number(Math.min(...dbScalSorted)));
 
                 // console.log('Ángulos ordenados:', angSorted);
                 // console.log('Lista distancias:', distSorted);
@@ -723,7 +731,7 @@ useEffect(()=>{
             </div>
         
         <div id='HomeContainer'>
-            
+            <div className='firstRowParent'>
             <div className='FirstRowContainer'>
                
 
@@ -899,18 +907,27 @@ useEffect(()=>{
                 </div>
                 
             </div>
-            
+                <div className='secondRowContainer'>
+                    gaa
+                </div>
+            </div>
             <div className='tablesContainer'>
 
             
                 <div className='tableContainer'>
-                    <Plot
-                        data={data}
-                        layout={layout}
-                        config={{ responsive: true, useResizeHandler:true }}
-                        useResizeHandler={true}
-                        className='plotChart'
-                    />
+                <Plot
+                id="chart"
+                data={data}
+                layout={layout}
+                config={{ 
+                    responsive: true,
+                    useResizeHandler: true,
+                    scrollZoom: true, // Permite zoom con la rueda del ratón
+                    displayModeBar: true, // Muestra la barra de herramientas
+                    editable: true, // Permite editar el gráfico
+                 }}
+                className="plotChart"
+                />
                     <table className='dataTable'>
                         <thead>
                             <th>Sample</th>
