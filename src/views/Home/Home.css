@@ -260,6 +260,16 @@ input[type=file]::file-selector-button {
     margin-bottom: 5px;
     font-weight:400
 }
+
+.dbMaxMinInfoContainer{
+    width: 100%;
+    background: linear-gradient(135deg, rgba(20, 20, 20, 0.7), rgba(40, 40, 40, 0.5));
+    backdrop-filter: blur(10px);
+    border-radius: 5px;
+    padding-bottom: 5px;
+    padding-top: 5px;
+}
+
 .tableContainer{
     width: fit-content;
     min-height: fit-content;

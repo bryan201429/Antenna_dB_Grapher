@@ -23,7 +23,10 @@ export default function Home(){
     const [distanceToScal,setDistanceToScal]=useState(0);
     const [selectedModel,setSelectedModel]=useState(0); 
     const [staticCsv,setStaticCsv] = useState(false);
-
+    const [maxPot,setMaxPot] = useState(null);                                  //Valor max de pot
+    const [maxTheta,setMaxTheta] = useState(null);                              //Theta con pot max de pot
+    const [minPot,setMinPot] = useState(null);                                  //Valor mínimo de pot.
+    const [minTheta,setMinTheta] = useState(null);                              //Theta con pot mínimo de pot
 
     const [thetaAfterSpline,setThetaAfterSpline]=useState([]);
     const [potDbScalAfterSpline,setPotDbScalAfterSpline]=useState([]);
@@ -31,6 +34,11 @@ export default function Home(){
     const [dbOriginalAfterSpline,setDbOriginalAfterSpline]=useState([]);
     const [potTxEstimatedAfterSpline,setPotTxEstimatedAfterSpline]=useState([]);
     const [potPredictedAfterSpline,setPotPredictedAfterSpline]=useState([]);
+    const [maxPotAfterSpline,setMaxPotAfterSpline] = useState(null);            //Valor max de pot.spline
+    const [maxThetaAfterSpline,setMaxThetaAfterSpline] = useState(null);        //Theta con pot mínimo de pot.spline
+    const [minPotAfterSpline,setMinPotAfterSpline] = useState(null);            //Valor mínimo de pot.spline
+    const [minThetaAfterSpline,setMinThetaAfterSpline] = useState(null);        //Theta con pot mínimo de pot.spline
+
 
     const [interEnabled,setInterEnabled] = useState(false);
     const [interNumber,setInterNumber] = useState(false);
@@ -220,6 +228,22 @@ export default function Home(){
         setDbOriginalAfterSpline(interpolatedPotOriginal);
         setPotTxEstimatedAfterSpline(interpolatedValues);
         setPotPredictedAfterSpline(interpolatedDbPredicted);
+
+        //Encontrar el valor máx de pot de la data spline:
+        const { maxDb, maxTheta } = interpolatedDbScaled.reduce(
+            (acc, db, i) => db > acc.maxDb ? { maxDb: db, maxTheta: splineTheta[i] } : acc, //condicion
+            { maxDb: -Infinity, maxTheta: 0 }   //valores iniciales
+          );
+        setMaxPotAfterSpline(maxDb);
+        setMaxThetaAfterSpline(maxTheta);
+        
+        //Encontrar el valor min de pot de la data spline:
+        const { minDb, minTheta } = interpolatedDbScaled.reduce(
+            (acc, db, i) => db < acc.minDb ? { minDb: db, minTheta: splineTheta[i] } : acc, //condicion
+            { minDb: Infinity, minTheta: 0 }   //valores iniciales
+            );
+            setMinPotAfterSpline(minDb);
+            setMinThetaAfterSpline(minTheta);
 
         //! ////////////////////		GRAFICO SPLINE		////////////////
         const datagraph = [
@@ -625,13 +649,16 @@ export default function Home(){
                                 }
                             }
                         if (dist[x] == distmax) {       // Valor máximo, no tendría perdidas
-                            let L=69.55 + 26.16*Math.log10(frequencyLocal) - 13.82*Math.log10(okumuraValueInputs.txHeight) - ahm + (44.9-6.55*Math.log10(okumuraValueInputs.txHeight))*Math.log10(Math.abs(dist[x])/1000);
+                            let L=69.55 + 26.16*Math.log10(frequencyLocal) - 13.82*Math.log10(okumuraValueInputs.txHeight) - ahm +
+                             (44.9-6.55*Math.log10(okumuraValueInputs.txHeight))*Math.log10(Math.abs(dist[x])/1000);
                             listadbscal[x] = pot[x];
                             potEstOrigen[x]= pot[x] + (L - K);
                         }
                         else{
-                            let L=69.55 + 26.16*Math.log10(frequencyLocal) - 13.82*Math.log10(okumuraValueInputs.txHeight) - ahm + (44.9-6.55*Math.log10(okumuraValueInputs.txHeight))*Math.log10(Math.abs(dist[x])/1000);
-                            let L2=69.55 + 26.16*Math.log10(frequencyLocal) - 13.82*Math.log10(okumuraValueInputs.txHeight) - ahm + (44.9-6.55*Math.log10(okumuraValueInputs.txHeight))*Math.log10(Math.abs(distmax)/1000);
+                            let L=69.55 + 26.16*Math.log10(frequencyLocal) - 13.82*Math.log10(okumuraValueInputs.txHeight) - ahm + 
+                            (44.9-6.55*Math.log10(okumuraValueInputs.txHeight))*Math.log10(Math.abs(dist[x])/1000);
+                            let L2=69.55 + 26.16*Math.log10(frequencyLocal) - 13.82*Math.log10(okumuraValueInputs.txHeight) - ahm + 
+                            (44.9-6.55*Math.log10(okumuraValueInputs.txHeight))*Math.log10(Math.abs(distmax)/1000);
                             console.log(pot[x],{ahm},{L},{L2},{K})
                             listadbscal[x] = pot[x] + (L - K) -(L2 - K);
                             potEstOrigen[x]= pot[x] + (L - K);
@@ -683,6 +710,23 @@ export default function Home(){
                 // console.log('Lista distancias:', distSorted);
                 // console.log('Lista db escalados:', dbScalSorted);
                 // console.log('Lista db original:', potSorted);
+
+                //Encontrar el valor máx de pot de la data spline:
+                const { maxDb, maxTheta } = potDbScal.reduce(
+                    (acc, db, i) => db > acc.maxDb ? { maxDb: db, maxTheta: angSorted[i] } : acc, //condicion
+                    { maxDb: -Infinity, maxTheta: 0 }   //valores iniciales
+                );
+                setMaxPot(maxDb);
+                setMaxTheta(maxTheta);
+                
+                //Encontrar el valor min de pot de la data spline:
+                const { minDb, minTheta } = potDbScal.reduce(
+                    (acc, db, i) => db < acc.minDb ? { minDb: db, minTheta: angSorted[i] } : acc, //condicion
+                    { minDb: Infinity, minTheta: 0 }   //valores iniciales
+                    );
+                setMinPot(minDb);
+                setMinTheta(minTheta);
+                    
 
             //! ////////////////////		GRAFICO POLAR		////////////////
 
@@ -755,14 +799,11 @@ useEffect(()=>{
                             </label> */}
                         </div>
                         
-
                                 <div className='interpolationPointsBox'>
                                     Puntos de interpolación deseados:
                                     <input id='interpolationPoints' type="number" onChange={handleInputInterpolChange}/>
                                 </div>
                                 <button id='interpolButton' onClick={handleApplyInterpol}>Aplicar Interpolación </button>
-
-                        
                         
                     </div>
                     <div className='propagationBox'>
@@ -965,6 +1006,11 @@ useEffect(()=>{
                         useResizeHandler={true}
                         className='plotChart'
                     />
+                    <div className='dbMaxMinInfoContainer'> 
+                        
+                        <div>Valor máximo de pot:</div>
+                        <div>Valor mínimo de pot</div>
+                    </div>
                     <table className='dataTable'>
                             <thead>
                                 <th>Sample</th>
