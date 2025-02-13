@@ -269,7 +269,19 @@ input[type=file]::file-selector-button {
     padding-bottom: 5px;
     padding-top: 5px;
 }
-
+.dbMaxMinInfoRow{
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0;
+    margin: 0;
+    height: fit-content;
+    border-bottom: 1px solid white;
+    border-top: 1px solid white;
+}
+.dbMaxMinInfoRow h3{
+    margin: 0;
+}
 .tableContainer{
     width: fit-content;
     min-height: fit-content;

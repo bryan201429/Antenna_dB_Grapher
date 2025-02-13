@@ -969,6 +969,10 @@ useEffect(()=>{
                  }}
                 className="plotChart"
                 />
+                    <div className='dbMaxMinInfoContainer'> 
+                        <div className='dbMaxMinInfoRow'><h3>{'Valor máximo de pot:'}&nbsp;</h3> <h3>{` ${maxPot} @ ${maxTheta}°`}</h3></div>
+                        <div className='dbMaxMinInfoRow'><h3>{'Valor mínimo de pot:'}&nbsp;</h3> <h3>{` ${minPot} @ ${minTheta}°`}</h3></div>
+                    </div>
                     <table className='dataTable'>
                         <thead>
                             <th>Sample</th>
@@ -1007,9 +1011,8 @@ useEffect(()=>{
                         className='plotChart'
                     />
                     <div className='dbMaxMinInfoContainer'> 
-                        
-                        <div>Valor máximo de pot:</div>
-                        <div>Valor mínimo de pot</div>
+                        <div className='dbMaxMinInfoRow'><h3>{'Valor máximo de pot:'}&nbsp;</h3> <h3>{` ${maxPotAfterSpline} @ ${maxThetaAfterSpline}°`}</h3></div>
+                        <div className='dbMaxMinInfoRow'><h3>{'Valor mínimo de pot:'}&nbsp;</h3> <h3>{` ${minPotAfterSpline} @ ${minThetaAfterSpline}°`}</h3></div>
                     </div>
                     <table className='dataTable'>
                             <thead>
