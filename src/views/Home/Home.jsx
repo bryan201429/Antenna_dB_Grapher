@@ -57,6 +57,7 @@ export default function Home(){
     const [okumuraValueInputsPrediction,setOkumuraValueInputsPrediction] = useState({txHeight: undefined, rxHeight: undefined, citySize:undefined, areaType:undefined})
     const [okumuraErrorFlagPrediction,SetokumuraErrorFlagPrediction ]= useState(false);
     const [okumuraReadyPrediction,SetOkumuraReadyPrediction ]= useState(false);
+    const [predictionDone, setPredictionDone]=useState(false);
 
     const [minDistancePrediction,setMinDistancePrediction ]= useState(0);
     const [maxDistancePrediction,setMaxDistancePrediction ]= useState(10000);
@@ -272,6 +273,11 @@ export default function Home(){
         console.log({interpolatedValues});
     }
 
+    useEffect(()=>{
+        console.log('Interpolando');
+        handleApplyInterpol();    
+    },[predictionDone])
+
     //! ///////////////////// OKUMURA INPUTS ////////////////////////////////////////////
         const txAntennaChange = (e)=>{
             SetOkumuraReady(false);
@@ -438,6 +444,7 @@ export default function Home(){
                     pot = pot - (L - K);
                 }
             }
+            setPredictionDone(true);
             return pot;
         });
         setDbPrediction(pots);
@@ -786,13 +793,13 @@ useEffect(()=>{
                     </div>
                     {staticCsv && <h3 className='staticCSVText'> Muestras tomadas a una misma distancia (radio) y ángulos (theta) equidistantes </h3>}
                     <div className='freqContainer'>
-                        <h3>Frecuencia detectada: </h3>
+                        <h3>FRECUENCIA DETECTADA: </h3>
                         <h3>{frequency ? `${frequency} MHz` : '-'}</h3>
 
                     </div>
                     <div className='interpolationBox'>
                     <div className='interpolationEnableBox'>
-                        <h3 >Interpolación</h3>
+                        <h3 >INTERPOLACIÓN</h3>
                             {/* <label className="toggleSwitch">
                                 <input type="checkbox" id="interpolationCheck" checked={interEnabled} onChange={handleCheckboxChange}/>
                                 <span className="slider"></span>
@@ -807,7 +814,7 @@ useEffect(()=>{
                         
                     </div>
                     <div className='propagationBox'>
-                        <h3>Modelo de propagación</h3>
+                        <h3>MODELO DE PROPAGACIÓN</h3>
                         <div className='selectModelPropagation'>
                         
                             <h4>Seleccione un modelo de propagación: </h4>
@@ -875,7 +882,7 @@ useEffect(()=>{
 
 
                     <div className='predictionBox'>
-                        <h3>Predicción</h3>
+                        <h3>ESTIMACIÓN </h3>
                         <div className='selectModelPropagation'>
                         
                         <h4>Seleccione un modelo de propagación: </h4>
@@ -940,7 +947,7 @@ useEffect(()=>{
                             <input type='range' name='distancia' min={minDistancePrediction} max={maxDistancePrediction} step='0.5' value={distanceToScal} onChange={handleSliderChange} id='slideInput'></input>
                             <input type='textbox' id='inputTextBox' min={minDistancePrediction} max={maxDistancePrediction} value={distanceToScal} onChange={handleTextBoxChange}></input>
                              {` m. `} 
-                            <button id='predictionButton' onClick={handlePredictionClick}>PREDICTION</button>
+                            <button id='predictionButton' onClick={handlePredictionClick}>APLICAR</button>
                         </div>
                         
                     </div>
