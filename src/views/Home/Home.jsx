@@ -1,9 +1,14 @@
 import './Home.css'
-import { useEffect, useState } from 'react';
+import { useEffect, useState,useRef } from 'react';
 import React from 'react';
 import Plot from 'react-plotly.js';
 import ErrorModal from '../../components/errorModal/ErrorModal';
 import cubicSpline from 'cubic-spline';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import html2canvas from "html2canvas";
 
 export default function Home(){
     const [dataCSV,setDataCSV]=useState(); 
@@ -775,6 +780,131 @@ useEffect(()=>{
     } 
 },[selectedModelPrediction])
 
+
+
+//! //////////////////////////// EXPORTAR //////////////////////////////////
+    const exportToExcel = () => {
+        // Obtener datos de la primera tabla
+        const table1 = [
+            ['Sample', 'Theta (°)', 'Dist. Original', 'Pot. Medida', 'Pot. Estimada en Origen', `Potencia Escalada en Distancia Máxima (${maxDistance} metros)`, 'PotPredicted'],
+            ...theta.map((_, i) => [
+                i,
+                theta[i].toFixed(3),
+                distances[i].toFixed(3),
+                dbOriginal[i],
+                potTxEstimated[i],
+                potDbScal[i],
+                dbPrediction[i]
+            ])
+        ];
+
+        // Obtener datos de la segunda tabla
+        const table2 = [
+            ['Sample', 'Theta (°)', 'Dist. Original', 'Pot. Medida', 'Pot. Estimada en Origen', `Potencia Escalada en Distancia Máxima (${maxDistance} metros)`, 'PotPredicted'],
+            ...thetaAfterSpline.map((_, i) => [
+                i,
+                thetaAfterSpline[i].toFixed(3),
+                distancesAfterSpline[i].toFixed(3),
+                dbOriginalAfterSpline[i],
+                potTxEstimatedAfterSpline[i],
+                potDbScalAfterSpline[i],
+                potPredictedAfterSpline[i]
+            ])
+        ];
+
+        // Crear un libro de Excel
+        const wb = XLSX.utils.book_new();
+        
+        // Crear hojas para cada tabla
+        const ws1 = XLSX.utils.aoa_to_sheet(table1);
+        const ws2 = XLSX.utils.aoa_to_sheet(table2);
+        
+        // Agregar hojas al libro
+        XLSX.utils.book_append_sheet(wb, ws1, "Tabla 1");
+        XLSX.utils.book_append_sheet(wb, ws2, "Tabla 2");
+
+        // Escribir el archivo
+        const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+
+        // Guardar el archivo con FileSaver
+        const file = new Blob([excelBuffer], { type: "application/octet-stream" });
+        saveAs(file, "datos.xlsx");
+    };
+
+        //? PDF ///////////////////////
+        const plotRef1 = useRef(null);
+        const plotRef2 = useRef(null);
+        const exportToPDF = async () => {
+            const doc = new jsPDF();
+    
+            // Configuración del título
+            doc.setFontSize(16);
+            doc.text("Reporte de Datos", 14, 15);
+    
+            // Datos de la primera tabla
+            const table1Columns = ['Sample', 'Theta (°)', 'Dist. Original', 'Pot. Medida', 'Pot. Estimada en Origen', `Pot. Escalada (${maxDistance}m)`, 'PotPredicted'];
+            const table1Rows = theta.map((_, i) => [
+                i,
+                theta[i].toFixed(3),
+                distances[i].toFixed(3),
+                dbOriginal[i],
+                potTxEstimated[i],
+                potDbScal[i],
+                dbPrediction[i]
+            ]);
+    
+            doc.autoTable({
+                startY: 25,
+                head: [table1Columns],
+                body: table1Rows,
+                theme: 'grid',
+                styles: { fontSize: 10 },
+                headStyles: { fillColor: [41, 128, 185] } // Azul
+            });
+    
+            let finalY = doc.lastAutoTable.finalY + 10; // Espacio después de la primera tabla
+    
+            // Datos de la segunda tabla
+            const table2Columns = ['Sample', 'Theta (°)', 'Dist. Original', 'Pot. Medida', 'Pot. Estimada en Origen', `Pot. Escalada (${maxDistance}m)`, 'PotPredicted'];
+            const table2Rows = thetaAfterSpline.map((_, i) => [
+                i,
+                thetaAfterSpline[i].toFixed(3),
+                distancesAfterSpline[i].toFixed(3),
+                dbOriginalAfterSpline[i],
+                potTxEstimatedAfterSpline[i],
+                potDbScalAfterSpline[i],
+                potPredictedAfterSpline[i]
+            ]);
+    
+            doc.autoTable({
+                startY: finalY,
+                head: [table2Columns],
+                body: table2Rows,
+                theme: 'grid',
+                styles: { fontSize: 10 },
+                headStyles: { fillColor: [231, 76, 60] } // Rojo
+            });
+    
+            finalY = doc.lastAutoTable.finalY + 20; // Espacio para gráficos
+    
+            // Convertir el primer gráfico a imagen
+            if (plotRef1.current) {
+                const canvas1 = await html2canvas(plotRef1.current);
+                const imgData1 = canvas1.toDataURL("image/png");
+                doc.addImage(imgData1, "PNG", 10, finalY, 180, 90);
+                finalY += 100; // Ajustar para el siguiente gráfico
+            }
+    
+            // Convertir el segundo gráfico a imagen
+            if (plotRef2.current) {
+                const canvas2 = await html2canvas(plotRef2.current);
+                const imgData2 = canvas2.toDataURL("image/png");
+                doc.addImage(imgData2, "PNG", 10, finalY, 180, 90);
+            }
+    
+            doc.save("Reporte.pdf");
+        };
+
     return(
         <div id='Home'>
             <div id='title'>
@@ -784,37 +914,21 @@ useEffect(()=>{
         <div id='HomeContainer'>
             <div className='firstRowParent'>
             <div className='FirstRowContainer'>
-               
 
                 <div className='optionsCointainer'>
                     <div className='uploader1'>
-                        <h3>Subir CSV para analisis</h3>
+                        <h3>IMPORTAR CSV PARA ANÁLISIS:</h3>
                         <input type='file' name ='file' accept='.csv' onChange={handleFileChange} className='inputFile'></input>    
                     </div>
-                    {staticCsv && <h3 className='staticCSVText'> Muestras tomadas a una misma distancia (radio) y ángulos (theta) equidistantes </h3>}
                     <div className='freqContainer'>
                         <h3>FRECUENCIA DETECTADA: </h3>
                         <h3>{frequency ? `${frequency} MHz` : '-'}</h3>
 
                     </div>
-                    <div className='interpolationBox'>
-                    <div className='interpolationEnableBox'>
-                        <h3 >INTERPOLACIÓN</h3>
-                            {/* <label className="toggleSwitch">
-                                <input type="checkbox" id="interpolationCheck" checked={interEnabled} onChange={handleCheckboxChange}/>
-                                <span className="slider"></span>
-                            </label> */}
-                        </div>
-                        
-                                <div className='interpolationPointsBox'>
-                                    Puntos de interpolación deseados:
-                                    <input id='interpolationPoints' type="number" onChange={handleInputInterpolChange}/>
-                                </div>
-                                <button id='interpolButton' onClick={handleApplyInterpol}>Aplicar Interpolación </button>
-                        
-                    </div>
+                    {staticCsv && <h3 className='staticCSVText'> Muestras tomadas a una misma distancia (radio) y ángulos (theta) equidistantes </h3>}
+
                     <div className='propagationBox'>
-                        <h3>MODELO DE PROPAGACIÓN</h3>
+                        <h3>MODELO DE PROPAGACIÓN:</h3>
                         <div className='selectModelPropagation'>
                         
                             <h4>Seleccione un modelo de propagación: </h4>
@@ -874,14 +988,22 @@ useEffect(()=>{
                             <button className='applyOkumuraButton' onClick={handleApply}> Aplicar Modelo</button>
                         </div>}
                     </div>
+                    <div>
+        {/* Botón para exportar */}
+        <h3>EXPORTAR RESULTADOS:</h3>
+        <div className='exportBox'>
+            <button className='excelButton' onClick={exportToExcel}>Exportar a Excel</button>
 
-
-
-
-
-
-
-                    <div className='predictionBox'>
+            <button onClick={exportToPDF}>Exportar a PDF</button>
+        </div>
+        
+        
+    </div>
+                </div>
+                
+            </div>
+                <div className='secondRowContainer'>
+                <div className='predictionBox'>
                         <h3>ESTIMACIÓN </h3>
                         <div className='selectModelPropagation'>
                         
@@ -951,20 +1073,31 @@ useEffect(()=>{
                         </div>
                         
                     </div>
-                    
+                    <div className='interpolationBox'>
+                        <div className='interpolationEnableBox'>
+                            <h3 >INTERPOLACIÓN</h3>
+                            {/* <label className="toggleSwitch">
+                                <input type="checkbox" id="interpolationCheck" checked={interEnabled} onChange={handleCheckboxChange}/>
+                                <span className="slider"></span>
+                            </label> */}
+                        </div>
+                        
+                                <div className='interpolationPointsBox'>
+                                    Puntos de interpolación deseados:
+                                    <input id='interpolationPoints' type="number" onChange={handleInputInterpolChange}/>
+                                </div>
+                                <button id='interpolButton' onClick={handleApplyInterpol}>Aplicar Interpolación </button>
+                        
+                    </div>
                 </div>
-                
             </div>
-                <div className='secondRowContainer'>
-                    gaa
-                </div>
-            </div>
-            <div className='tablesContainer'>
+            <div className='tablesContainer' ref={plotRef1}>
 
             
                 <div className='tableContainer'>
                 <Plot
                 id="chart"
+                
                 data={data}
                 layout={layout}
                 config={{ 
@@ -1009,8 +1142,10 @@ useEffect(()=>{
                         </tbody>
                     </table>
                 </div>
-                <div className='tableContainer'>
+                <div className='tableContainer' ref={plotRef2}>
                     <Plot
+                        id='chart2'
+                        
                         data={dataSpline}
                         layout={layout}
                         config={{ responsive: true, useResizeHandler:true }}

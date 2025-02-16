@@ -58,7 +58,6 @@ input[type=file]::file-selector-button {
     backdrop-filter: blur(5px);
     border-radius: 5px;
     width: 48vw;
-    /* height:20vw; */
     min-height: fit-content;
     display: flex;
     align-items: start;
@@ -66,27 +65,33 @@ input[type=file]::file-selector-button {
     padding-top: 5px;
     padding-bottom: 5px;
 }
-.secondRowContainer{
+.secondRowContainer {
     margin-bottom: 10px;
     background-color: rgba(80, 80, 80, 0.8);
     backdrop-filter: blur(5px);
     border-radius: 5px;
     width: 48vw;
-    /* height:20vw; */
-    /* min-height: fill-content; */
     display: flex;
+    flex-direction: column;
     align-items: start;
-    justify-content: space-evenly;
-    padding-top: 5px;
-    padding-bottom: 5px;
+    padding-right: 25px;
+    padding-left: 25px;
+    min-height: fit-content;
+    overflow: hidden;
+    transition: height 1s ;
+    box-sizing: border-box;
 }
+
 .freqContainer{
     display: flex;
     width: 100%;
     justify-content: space-between;
-    /* background-color: red; */
     padding: 0;
     margin: 0;
+    box-sizing: border-box;
+}
+.freqContainer h3{
+    margin: 5px;
 }
 .optionsCointainer{
     display: flex;
@@ -94,10 +99,11 @@ input[type=file]::file-selector-button {
     justify-content: start;
     align-items:flex-start;
     width: 90%;
-    min-height: fit-content;
+    height: fit-content;
     margin-right: 2%;
     /* background-color: blue; */
 }
+
 .OkumuraOptionsContainer{
     display: flex;
     flex-direction: column;
@@ -149,6 +155,7 @@ input[type=file]::file-selector-button {
     transition: background .1s ease-in-out;
     margin-left: auto;
     margin-right: auto;
+    margin-bottom: 15px;
 }
 
 .applyOkumuraButton:active{
@@ -188,12 +195,12 @@ input[type=file]::file-selector-button {
     justify-content: space-between;
     align-items: flex-start;
     width: 100%;
-    padding-top: 5px;
-    padding: 5px;
+    /* padding: 0px; */
+    
     border-top: solid 1px;
     border-bottom: solid 1px;
     box-sizing: border-box;
-    padding: 0;
+    padding-top: 10px;
 }
 .propagationBox h3{
     margin-bottom: 2px;
@@ -202,14 +209,17 @@ input[type=file]::file-selector-button {
 .predictionBox{
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
     align-items: flex-start;
     width: 100%;
-    padding-top: 5px;
+    padding-top: 10px;
     padding-bottom: 10px;
-    border-top: solid 1px;
     border-bottom: solid 1px;
     box-sizing: border-box;
+    margin-top: 0;
+    gap: 5px;
+}
+.predictionBox h3{
+    margin: 0;
 }
 .interpolationBox{
     display: flex;
@@ -383,4 +393,18 @@ input:checked + .slider {
 
 input:checked + .slider:before {
   transform: translateX(36px);
+}
+
+.exportBox{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding-bottom: 5px;
+    /* padding-top: 5px; */
+}
+.excelButton{
+    background-color: #4caf50;
+    border: 0px;
+    border-radius: 2px;
+    padding: 10px;
 }
