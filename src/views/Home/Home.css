@@ -395,6 +395,13 @@ input:checked + .slider:before {
   transform: translateX(36px);
 }
 
+.graphContainer{
+    height: fit-content;
+    width: fit-content;
+    padding: 0;
+    margin: 0;
+}
+
 .exportBox{
     display: flex;
     flex-direction: row;

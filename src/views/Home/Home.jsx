@@ -1091,24 +1091,26 @@ useEffect(()=>{
                     </div>
                 </div>
             </div>
-            <div className='tablesContainer' ref={plotRef1}>
+            <div className='tablesContainer' >
 
             
-                <div className='tableContainer'>
-                <Plot
-                id="chart"
-                
-                data={data}
-                layout={layout}
-                config={{ 
-                    responsive: true,
-                    useResizeHandler: true,
-                    scrollZoom: true, // Permite zoom con la rueda del ratón
-                    displayModeBar: true, // Muestra la barra de herramientas
-                    editable: true, // Permite editar el gráfico
-                 }}
-                className="plotChart"
-                />
+                <div className='tableContainer' >
+                    <div className='graphContainer' ref={plotRef1}>
+                        <Plot
+                        id="chart"
+                        data={data}
+                        layout={layout}
+                        config={{ 
+                            responsive: true,
+                            useResizeHandler: true,
+                            scrollZoom: true, // Permite zoom con la rueda del ratón
+                            displayModeBar: true, // Muestra la barra de herramientas
+                            editable: true, // Permite editar el gráfico
+                        }}
+                        className="plotChart"
+                        />
+                </div>
+
                     <div className='dbMaxMinInfoContainer'> 
                         <div className='dbMaxMinInfoRow'><h3>{'Valor máximo de pot:'}&nbsp;</h3> <h3>{` ${maxPot} @ ${maxTheta}°`}</h3></div>
                         <div className='dbMaxMinInfoRow'><h3>{'Valor mínimo de pot:'}&nbsp;</h3> <h3>{` ${minPot} @ ${minTheta}°`}</h3></div>
@@ -1142,16 +1144,18 @@ useEffect(()=>{
                         </tbody>
                     </table>
                 </div>
-                <div className='tableContainer' ref={plotRef2}>
-                    <Plot
-                        id='chart2'
-                        
-                        data={dataSpline}
-                        layout={layout}
-                        config={{ responsive: true, useResizeHandler:true }}
-                        useResizeHandler={true}
-                        className='plotChart'
-                    />
+                <div className='tableContainer' >
+                    <div className='graphContainer' ref={plotRef2}>
+                        <Plot
+                            id='chart2'
+                            
+                            data={dataSpline}
+                            layout={layout}
+                            config={{ responsive: true, useResizeHandler:true }}
+                            useResizeHandler={true}
+                            className='plotChart'
+                        />
+                    </div>
                     <div className='dbMaxMinInfoContainer'> 
                         <div className='dbMaxMinInfoRow'><h3>{'Valor máximo de pot:'}&nbsp;</h3> <h3>{` ${maxPotAfterSpline} @ ${maxThetaAfterSpline}°`}</h3></div>
                         <div className='dbMaxMinInfoRow'><h3>{'Valor mínimo de pot:'}&nbsp;</h3> <h3>{` ${minPotAfterSpline} @ ${minThetaAfterSpline}°`}</h3></div>
