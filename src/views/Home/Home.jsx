@@ -840,7 +840,22 @@ useEffect(()=>{
             // Configuración del título
             doc.setFontSize(16);
             doc.text("Reporte de Datos", 14, 15);
-    
+            let currentY = 20;
+
+            // Convertir el primer gráfico a imagen
+            if (plotRef1.current) {
+                const canvas1 = await html2canvas(plotRef1.current);
+                const imgData1 = canvas1.toDataURL("image/png");
+                const imgWidth = 135; // Ancho fijo en el PDF
+                const aspectRatio = canvas1.height / canvas1.width;
+                const imgHeight = imgWidth * aspectRatio; // Mantener relación de aspecto
+                const pdfWidth = doc.internal.pageSize.width;
+                const xPosition = (pdfWidth - imgWidth) / 2; // Centrar horizontalmente
+            
+                doc.addImage(imgData1, "PNG", xPosition, currentY, imgWidth, imgHeight);
+                currentY += 150; // Ajustar para el siguiente gráfico
+            }
+
             // Datos de la primera tabla
             const table1Columns = ['Sample', 'Theta (°)', 'Dist. Original', 'Pot. Medida', 'Pot. Estimada en Origen', `Pot. Escalada (${maxDistance}m)`, 'PotPredicted'];
             const table1Rows = theta.map((_, i) => [
@@ -854,7 +869,7 @@ useEffect(()=>{
             ]);
     
             doc.autoTable({
-                startY: 25,
+                startY: currentY,
                 head: [table1Columns],
                 body: table1Rows,
                 theme: 'grid',
@@ -862,8 +877,27 @@ useEffect(()=>{
                 headStyles: { fillColor: [41, 128, 185] } // Azul
             });
     
-            let finalY = doc.lastAutoTable.finalY + 10; // Espacio después de la primera tabla
-    
+            currentY = doc.lastAutoTable.finalY + 10; // Espacio después de la primera tabla
+
+        // Agregar un salto de página si es necesario
+        if (currentY + 100 > doc.internal.pageSize.height) {
+            doc.addPage();
+            currentY = 20; // Reiniciar la posición en la nueva página
+        }
+
+        // Convertir el segundo gráfico a imagen
+        if (plotRef2.current) {
+            const canvas2 = await html2canvas(plotRef2.current);
+            const imgData2 = canvas2.toDataURL("image/png");
+            doc.addImage(imgData2, "PNG", 10, currentY, 180, 180);
+            currentY += 100; // Ajustar la posición
+        }
+
+            // Agregar un salto de página si es necesario
+            if (currentY + 40 > doc.internal.pageSize.height) {
+                doc.addPage();
+                currentY = 20;
+            }
             // Datos de la segunda tabla
             const table2Columns = ['Sample', 'Theta (°)', 'Dist. Original', 'Pot. Medida', 'Pot. Estimada en Origen', `Pot. Escalada (${maxDistance}m)`, 'PotPredicted'];
             const table2Rows = thetaAfterSpline.map((_, i) => [
@@ -877,30 +911,13 @@ useEffect(()=>{
             ]);
     
             doc.autoTable({
-                startY: finalY,
+                startY: currentY,
                 head: [table2Columns],
                 body: table2Rows,
                 theme: 'grid',
                 styles: { fontSize: 10 },
                 headStyles: { fillColor: [231, 76, 60] } // Rojo
             });
-    
-            finalY = doc.lastAutoTable.finalY + 20; // Espacio para gráficos
-    
-            // Convertir el primer gráfico a imagen
-            if (plotRef1.current) {
-                const canvas1 = await html2canvas(plotRef1.current);
-                const imgData1 = canvas1.toDataURL("image/png");
-                doc.addImage(imgData1, "PNG", 10, finalY, 180, 90);
-                finalY += 100; // Ajustar para el siguiente gráfico
-            }
-    
-            // Convertir el segundo gráfico a imagen
-            if (plotRef2.current) {
-                const canvas2 = await html2canvas(plotRef2.current);
-                const imgData2 = canvas2.toDataURL("image/png");
-                doc.addImage(imgData2, "PNG", 10, finalY, 180, 90);
-            }
     
             doc.save("Reporte.pdf");
         };
