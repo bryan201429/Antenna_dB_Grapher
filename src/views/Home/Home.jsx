@@ -877,7 +877,7 @@ useEffect(()=>{
                 headStyles: { fillColor: [41, 128, 185] } // Azul
             });
     
-            currentY = doc.lastAutoTable.finalY + 10; // Espacio después de la primera tabla
+            currentY = doc.lastAutoTable.finalY + 20; // Espacio después de la primera tabla
 
         // Agregar un salto de página si es necesario
         if (currentY + 100 > doc.internal.pageSize.height) {
@@ -885,12 +885,23 @@ useEffect(()=>{
             currentY = 20; // Reiniciar la posición en la nueva página
         }
 
+        // GRAFICO 2
+
+        doc.setFontSize(14);
+        doc.text("Diagrama de radiación 2 con data interpolada:", doc.internal.pageSize.width / 2, currentY, { align: "right" });
+        currentY += 5; // Espacio después del texto
+        
         // Convertir el segundo gráfico a imagen
         if (plotRef2.current) {
             const canvas2 = await html2canvas(plotRef2.current);
             const imgData2 = canvas2.toDataURL("image/png");
-            doc.addImage(imgData2, "PNG", 10, currentY, 180, 180);
-            currentY += 100; // Ajustar la posición
+            const imgWidth2 = 135; // Ancho fijo en el PDF
+            const aspectRatio = canvas2.height / canvas2.width;
+            const imgHeight2 = imgWidth2 * aspectRatio; // Mantener relación de aspecto
+            const pdfWidth = doc.internal.pageSize.width;
+            const xPosition = (pdfWidth - imgWidth2) / 2; // Centrar horizontalmente
+            doc.addImage(imgData2, "PNG", xPosition, currentY, imgWidth2, imgHeight2);
+            currentY += imgHeight2; // Ajustar la posición
         }
 
             // Agregar un salto de página si es necesario
