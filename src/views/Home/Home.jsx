@@ -9,6 +9,7 @@ import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import html2canvas from "html2canvas";
+import autoTable from "jspdf-autotable";
 
 export default function Home(){
     const [dataCSV,setDataCSV]=useState(); 
@@ -838,9 +839,43 @@ useEffect(()=>{
             const doc = new jsPDF();
     
             // Configuración del título
+            const title = "Reporte de Datos";
             doc.setFontSize(16);
-            doc.text("Reporte de Datos", 14, 15);
-            let currentY = 20;
+        
+            // Obtener el ancho de la página
+            const pageWidth = doc.internal.pageSize.getWidth();
+        
+            // Calcular el ancho del texto
+            const textWidth = doc.getTextWidth(title);
+        
+            // Calcular la posición X para centrar
+            const x = (pageWidth - textWidth) / 2;
+        
+            // Dibujar el título centrado
+            doc.text(title, x, 15);
+        // Obtener fecha actual en formato legible
+            const fechaActual = new Date().toLocaleDateString();
+
+            // Datos para la tabla
+            const data = [
+                ["Fecha", fechaActual],
+                ["Frecuencia (Hz)", "433000000"],  // Ejemplo de frecuencia en Hz
+                ["Número de Muestras", "1500"],
+                ["Latitud de Origen", "-16.409047"],
+                ["Longitud de Origen", "-71.537451"],
+            ];
+
+            // Configuración de la tabla
+            autoTable(doc, {
+                startY: 25, // Posición después del título
+                head: [["Parámetro", "Valor"]],
+                body: data,
+                theme: "grid",
+                styles: { fontSize: 9, cellPadding: 1.5 },
+                rowStyles: { minCellHeight: 5 } // Reducir la altura de las filas
+            });
+             // Obtener la posición final de la tabla
+            let currentY = doc.lastAutoTable.finalY + 5;
 
             // Convertir el primer gráfico a imagen
             if (plotRef1.current) {
@@ -849,15 +884,16 @@ useEffect(()=>{
                 const imgWidth = 135; // Ancho fijo en el PDF
                 const aspectRatio = canvas1.height / canvas1.width;
                 const imgHeight = imgWidth * aspectRatio; // Mantener relación de aspecto
+                console.log('Image 1 height:',imgHeight)
                 const pdfWidth = doc.internal.pageSize.width;
                 const xPosition = (pdfWidth - imgWidth) / 2; // Centrar horizontalmente
             
                 doc.addImage(imgData1, "PNG", xPosition, currentY, imgWidth, imgHeight);
-                currentY += 150; // Ajustar para el siguiente gráfico
+                currentY += imgHeight; // Ajustar para el siguiente gráfico
             }
 
             // Datos de la primera tabla
-            const table1Columns = ['Sample', 'Theta (°)', 'Dist. Original', 'Pot. Medida', 'Pot. Estimada en Origen', `Pot. Escalada (${maxDistance}m)`, 'PotPredicted'];
+            const table1Columns = ['Sample', 'Theta (°)', 'Dist. Original', 'Pot. Medida', 'Pot. Estimada en Origen', `Pot. Escalada (a ${maxDistance}m)`, 'PotPredicted'];
             const table1Rows = theta.map((_, i) => [
                 i,
                 theta[i].toFixed(3),
@@ -873,8 +909,9 @@ useEffect(()=>{
                 head: [table1Columns],
                 body: table1Rows,
                 theme: 'grid',
-                styles: { fontSize: 10 },
-                headStyles: { fillColor: [41, 128, 185] } // Azul
+                styles: { fontSize: 9, cellPadding: 1.5 }, // Reduce el espacio dentro de las celdas
+                headStyles: { fillColor: [41, 128, 185] }, // Azul
+                rowStyles: { minCellHeight: 5 } // Reducir la altura de las filas
             });
     
             currentY = doc.lastAutoTable.finalY + 20; // Espacio después de la primera tabla
@@ -898,6 +935,7 @@ useEffect(()=>{
             const imgWidth2 = 135; // Ancho fijo en el PDF
             const aspectRatio = canvas2.height / canvas2.width;
             const imgHeight2 = imgWidth2 * aspectRatio; // Mantener relación de aspecto
+            console.log('Image 1 height:',imgHeight2)
             const pdfWidth = doc.internal.pageSize.width;
             const xPosition = (pdfWidth - imgWidth2) / 2; // Centrar horizontalmente
             doc.addImage(imgData2, "PNG", xPosition, currentY, imgWidth2, imgHeight2);
@@ -926,8 +964,9 @@ useEffect(()=>{
                 head: [table2Columns],
                 body: table2Rows,
                 theme: 'grid',
-                styles: { fontSize: 10 },
-                headStyles: { fillColor: [231, 76, 60] } // Rojo
+                styles: { fontSize: 9, cellPadding: 1.5 }, // Reduce el espacio dentro de las celdas
+                headStyles: { fillColor: [231, 76, 60] }, // Rojo
+                rowStyles: { minCellHeight: 5 } // Reducir la altura de las filas
             });
     
             doc.save("Reporte.pdf");
