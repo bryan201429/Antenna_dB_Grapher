@@ -50,7 +50,7 @@ export default function Home(){
 
 
     const [interEnabled,setInterEnabled] = useState(false);
-    const [interNumber,setInterNumber] = useState(false);
+    const [interNumber,setInterNumber] = useState(null);
     const [interReady,setInterReady] = useState(false);
 
     const [okumuraSettingsVisibility,setOkumuraSettingsVisibility]=useState(false); //Visibilidad de ajustes para Modelo Okumura
@@ -283,7 +283,7 @@ export default function Home(){
     }
 
     useEffect(()=>{
-        console.log('Interpolando');
+        console.log('Interpolando despues de predicción');
         handleApplyInterpol();    
     },[predictionDone])
 
@@ -453,10 +453,11 @@ export default function Home(){
                     pot = pot - (L - K);
                 }
             }
-            setPredictionDone(true);
+            
             return pot;
         });
-        setDbPrediction(pots);
+        setDbPrediction(pots);     
+        setPredictionDone(prev => !prev);  
     }
 
     //! ///////////////////////////////////////////////////////////////
