@@ -33,6 +33,9 @@ export default function Home(){
     const [maxTheta,setMaxTheta] = useState(null);                              //Theta con pot max de pot
     const [minPot,setMinPot] = useState(null);                                  //Valor mínimo de pot.
     const [minTheta,setMinTheta] = useState(null);                              //Theta con pot mínimo de pot
+    const [latOrigen,setLatOrigen] = useState(-16.426006833333332);
+    const [lonOrigen,setLonOrigen] = useState(-71.57327866666667);
+
 
     const [thetaAfterSpline,setThetaAfterSpline]=useState([]);
     const [potDbScalAfterSpline,setPotDbScalAfterSpline]=useState([]);
@@ -484,8 +487,10 @@ export default function Home(){
             setDbPrediction([]);
 
 
-            let lat1 = -16.426006833333332; lat1 = lat1 * Math.PI / 180;          //Origen geográfico conocido de la señal
-            let lon1 = -71.57327866666667; lon1 = lon1 * Math.PI / 180;           //Origen geográfico conocido de la señal
+            // let lat1 = -16.426006833333332; 
+            let lat1 = latOrigen * Math.PI / 180;          //Origen geográfico conocido de la señal
+            // let lon1 = -71.57327866666667; 
+            let lon1 = lonOrigen * Math.PI / 180;           //Origen geográfico conocido de la señal
 
             if (rows[0]) {
                 rows[0].forEach(column => {
@@ -859,10 +864,10 @@ useEffect(()=>{
             // Datos para la tabla
             const data = [
                 ["Fecha", fechaActual],
-                ["Frecuencia (Hz)", "433000000"],  // Ejemplo de frecuencia en Hz
+                ["Frecuencia (MHz)", frequency],  // Ejemplo de frecuencia en Hz
                 ["Número de Muestras", "1500"],
-                ["Latitud de Origen", "-16.409047"],
-                ["Longitud de Origen", "-71.537451"],
+                ["Latitud de Origen", latOrigen],
+                ["Longitud de Origen", lonOrigen],
             ];
 
             // Configuración de la tabla
@@ -875,13 +880,19 @@ useEffect(()=>{
                 rowStyles: { minCellHeight: 5 } // Reducir la altura de las filas
             });
              // Obtener la posición final de la tabla
-            let currentY = doc.lastAutoTable.finalY + 5;
 
+
+            let currentY = doc.lastAutoTable.finalY + 10;
+
+            doc.setFontSize(13);
+            doc.text("Diagrama de radiación 1 + data:", 10, currentY);
+            
+            currentY += 5; // Espacio después del texto
             // Convertir el primer gráfico a imagen
             if (plotRef1.current) {
                 const canvas1 = await html2canvas(plotRef1.current);
                 const imgData1 = canvas1.toDataURL("image/png");
-                const imgWidth = 135; // Ancho fijo en el PDF
+                const imgWidth = 140; // Ancho fijo en el PDF
                 const aspectRatio = canvas1.height / canvas1.width;
                 const imgHeight = imgWidth * aspectRatio; // Mantener relación de aspecto
                 console.log('Image 1 height:',imgHeight)
@@ -889,7 +900,7 @@ useEffect(()=>{
                 const xPosition = (pdfWidth - imgWidth) / 2; // Centrar horizontalmente
             
                 doc.addImage(imgData1, "PNG", xPosition, currentY, imgWidth, imgHeight);
-                currentY += imgHeight; // Ajustar para el siguiente gráfico
+                currentY += imgHeight+1; // Ajustar para el siguiente gráfico
             }
 
             // Datos de la primera tabla
@@ -924,22 +935,22 @@ useEffect(()=>{
 
         // GRAFICO 2
 
-        doc.setFontSize(14);
-        doc.text("Diagrama de radiación 2 con data interpolada:", doc.internal.pageSize.width / 2, currentY, { align: "right" });
+        doc.setFontSize(13);
+        doc.text("Diagrama de radiación 2 + data interpolada:", doc.internal.pageSize.width / 2, currentY, { align: "right" });
         currentY += 5; // Espacio después del texto
         
         // Convertir el segundo gráfico a imagen
         if (plotRef2.current) {
             const canvas2 = await html2canvas(plotRef2.current);
             const imgData2 = canvas2.toDataURL("image/png");
-            const imgWidth2 = 135; // Ancho fijo en el PDF
+            const imgWidth2 = 140; // Ancho fijo en el PDF
             const aspectRatio = canvas2.height / canvas2.width;
             const imgHeight2 = imgWidth2 * aspectRatio; // Mantener relación de aspecto
             console.log('Image 1 height:',imgHeight2)
             const pdfWidth = doc.internal.pageSize.width;
             const xPosition = (pdfWidth - imgWidth2) / 2; // Centrar horizontalmente
             doc.addImage(imgData2, "PNG", xPosition, currentY, imgWidth2, imgHeight2);
-            currentY += imgHeight2; // Ajustar la posición
+            currentY += imgHeight2+1; // Ajustar la posición
         }
 
             // Agregar un salto de página si es necesario
