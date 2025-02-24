@@ -190,13 +190,23 @@ input[type=file]::file-selector-button {
     padding-top: 0px;
     border-bottom: solid 1px;
 }
+#saveCoord{
+    height: fit-content;
+    padding: 5px;
+    border-radius: 2px;
+    width: 100px;
+    background-color: rgb(25, 70, 168);
+    border: 0px ;
+}
 .coordContainer{
     display: flex;
     justify-content: flex-start;
     gap: 30px;
     margin: 0;
-    background-color: red;
     padding: 0;
+    align-items: center;
+    /* background-color: red; */
+    margin-bottom: 10px;
 }
 .dividerCoord{
     display: flex;
@@ -207,6 +217,12 @@ input[type=file]::file-selector-button {
 }
 .dividerCoord input{
     height: 20px;
+    border-radius: 5px;
+    border: 0px;
+    background-color: rgb(41, 41, 41);
+}
+.dividerCoord h4{
+    margin: 0;
 }
 
 .uploader1{

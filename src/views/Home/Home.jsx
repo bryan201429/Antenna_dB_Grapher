@@ -1006,6 +1006,7 @@ useEffect(()=>{
                                 <h4>Longitud:</h4>
                                 <input type='number' ></input>    
                             </div>
+                            <button id='saveCoord'> GUARDAR</button>
                         </div>
                         
                     </div>
