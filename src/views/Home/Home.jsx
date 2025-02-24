@@ -995,6 +995,20 @@ useEffect(()=>{
             <div className='FirstRowContainer'>
 
                 <div className='optionsCointainer'>
+                <div className='uploader0'>
+                        <h3>COORDENADAS DE ORIGEN DE LA SEÑAL DE RADIOFRECUENCIA:</h3>
+                        <div className='coordContainer'>
+                            <div className='dividerCoord'>
+                                <h4>Latitud:</h4>
+                                <input type='number' ></input>    
+                            </div>
+                            <div className='dividerCoord'>
+                                <h4>Longitud:</h4>
+                                <input type='number' ></input>    
+                            </div>
+                        </div>
+                        
+                    </div>
                     <div className='uploader1'>
                         <h3>IMPORTAR CSV PARA ANÁLISIS:</h3>
                         <input type='file' name ='file' accept='.csv' onChange={handleFileChange} className='inputFile'></input>    
@@ -1069,12 +1083,7 @@ useEffect(()=>{
                     </div>
                     <div>
         {/* Botón para exportar */}
-        <h3>EXPORTAR RESULTADOS:</h3>
-        <div className='exportBox'>
-            <button className='excelButton' onClick={exportToExcel}>Exportar a Excel</button>
-
-            <button onClick={exportToPDF}>Exportar a PDF</button>
-        </div>
+       
         
         
     </div>
@@ -1160,13 +1169,17 @@ useEffect(()=>{
                                 <span className="slider"></span>
                             </label> */}
                         </div>
-                        
-                                <div className='interpolationPointsBox'>
-                                    Puntos de interpolación deseados:
-                                    <input id='interpolationPoints' type="number" onChange={handleInputInterpolChange}/>
-                                </div>
-                                <button id='interpolButton' onClick={handleApplyInterpol}>Aplicar Interpolación </button>
-                        
+                        <div className='interpolationPointsBox'>
+                            Puntos de interpolación deseados:
+                            <input id='interpolationPoints' type="number" onChange={handleInputInterpolChange}/>
+                        </div>
+                        <button id='interpolButton' onClick={handleApplyInterpol}>Aplicar Interpolación </button>
+                    </div>
+                    <h3>EXPORTAR RESULTADOS:</h3>
+                    <div className='exportBox'>
+                        <button className='excelButton' onClick={exportToExcel}>Exportar a Excel</button>
+
+                        <button onClick={exportToPDF}>Exportar a PDF</button>
                     </div>
                 </div>
             </div>

@@ -180,6 +180,35 @@ input[type=file]::file-selector-button {
     min-height: 65vh;
     padding: 0;
 }
+.uploader0{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    width: 100%;
+    padding-bottom: 2px;
+    padding-top: 0px;
+    border-bottom: solid 1px;
+}
+.coordContainer{
+    display: flex;
+    justify-content: flex-start;
+    gap: 30px;
+    margin: 0;
+    background-color: red;
+    padding: 0;
+}
+.dividerCoord{
+    display: flex;
+    gap:10px;
+    align-items: center;
+    padding: 0;
+    margin: 0;
+}
+.dividerCoord input{
+    height: 20px;
+}
+
 .uploader1{
     display: flex;
     flex-direction: row;
