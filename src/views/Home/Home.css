@@ -190,6 +190,14 @@ input[type=file]::file-selector-button {
     padding-top: 0px;
     border-bottom: solid 1px;
 }
+.invalidCoord{
+    color:red;
+    margin: 0;
+}
+.validCoord{
+    color: green;
+    margin: 0;
+}
 #saveCoord{
     height: fit-content;
     padding: 5px;
@@ -234,6 +242,9 @@ input[type=file]::file-selector-button {
     padding-bottom: 2px;
     padding-top: 0px;
     border-bottom: solid 1px;
+}
+.uploader1 h4{
+    color: rgb(255, 72, 0);
 }
 .propagationBox{
     display: flex;

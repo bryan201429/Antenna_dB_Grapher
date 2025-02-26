@@ -35,7 +35,8 @@ export default function Home(){
     const [minTheta,setMinTheta] = useState(null);                              //Theta con pot mínimo de pot
     const [latOrigen,setLatOrigen] = useState(-16.426006833333332);
     const [lonOrigen,setLonOrigen] = useState(-71.57327866666667);
-
+    const [validCoord,setValidCoord] = useState(false);
+    const [touched, setTouched] = useState(false);
 
     const [thetaAfterSpline,setThetaAfterSpline]=useState([]);
     const [potDbScalAfterSpline,setPotDbScalAfterSpline]=useState([]);
@@ -136,8 +137,28 @@ export default function Home(){
             fill: 'toself'
         }
     ]);
+//? //////////// VALIDAR COORDENADAS DE ORIGEN ////////////////////////
+    const handleLatChange = async(e)=>{
+        setLatOrigen(Number(e.target.value));
+    }
 
+    const handleLonChange = async(e)=>{
+        setLonOrigen(Number(e.target.value));
+    }
+    const verificarCoord = (e)=>{
+        if((latOrigen>=-90 && latOrigen<=90) && (lonOrigen>=-90 && lonOrigen<=90)){
+            setValidCoord(true);
+            setTouched(true);
+            console.log('Validas coord')
+        }else{
+            setValidCoord(false);
+            setTouched(true);
+            console.log('Invalidas coordenadas')
+        }
+        
+    }
 
+//? //////////// CARGA DE ARCHIVO ////////////////////////
     const handleFileChange= async(e)=>{
         if(e.target.files){
             try{
@@ -1000,19 +1021,24 @@ useEffect(()=>{
                         <div className='coordContainer'>
                             <div className='dividerCoord'>
                                 <h4>Latitud:</h4>
-                                <input type='number' ></input>    
+                                <input type='number' onChange={handleLatChange}></input>    
                             </div>
                             <div className='dividerCoord'>
                                 <h4>Longitud:</h4>
-                                <input type='number' ></input>    
+                                <input type='number' onChange={handleLonChange}></input>    
                             </div>
-                            <button id='saveCoord'> GUARDAR</button>
+                            <button id='saveCoord' onClick={verificarCoord}> GUARDAR</button>
                         </div>
+                        
+                        {touched && !validCoord && <h5 className='invalidCoord'>INGRESE COORDENADAS VÁLIDAS: Lat y Long:(-90 a 90)</h5>}
+                        {touched && validCoord && <h5 className='validCoord'>COORDENADAS VÁLIDAS</h5>}
                         
                     </div>
                     <div className='uploader1'>
                         <h3>IMPORTAR CSV PARA ANÁLISIS:</h3>
-                        <input type='file' name ='file' accept='.csv' onChange={handleFileChange} className='inputFile'></input>    
+                        <h4>(Ingrese coordenadas primero -16.426006833333332,-71.57327866666667)</h4>
+                        { touched && validCoord && <input type='file' name ='file' accept='.csv' onChange={handleFileChange} className='inputFile'  disabled={!(validCoord && touched)} ></input>    }
+                        
                     </div>
                     <div className='freqContainer'>
                         <h3>FRECUENCIA DETECTADA: </h3>
@@ -1032,7 +1058,7 @@ useEffect(()=>{
                                     FSPL
                                 </label>
                                 <label>
-                                    <input type="radio" name="opcion" value="2" onChange={() => {setSelectedModel(1); }} checked={selectedModel === 1} disabled={!okumuraCompatible}/>
+                                    <input type="radio" name="opcion" value="2" onChange={() => {setSelectedModel(1); }} checked={selectedModel === 1}/>
                                     Okumura-Hata
                                 </label>
                             </div>
