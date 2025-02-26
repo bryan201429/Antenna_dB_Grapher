@@ -33,10 +33,16 @@ export default function Home(){
     const [maxTheta,setMaxTheta] = useState(null);                              //Theta con pot max de pot
     const [minPot,setMinPot] = useState(null);                                  //Valor mínimo de pot.
     const [minTheta,setMinTheta] = useState(null);                              //Theta con pot mínimo de pot
-    const [latOrigen,setLatOrigen] = useState(-16.426006833333332);
-    const [lonOrigen,setLonOrigen] = useState(-71.57327866666667);
+    const [latOrigen,setLatOrigen] = useState(0);
+    const [lonOrigen,setLonOrigen] = useState(0);
     const [validCoord,setValidCoord] = useState(false);
+    const [validCoordToogle,setValidCoordToogle] = useState(false);
+    const [doInterpolAfterCoordToogle,setDoInterpolAfterCoordToogle] = useState(false);
     const [touched, setTouched] = useState(false);
+    const [coordState, setCoordState] = useState({
+        validCoord: false,
+        validCoordToogle: false
+    });
 
     const [thetaAfterSpline,setThetaAfterSpline]=useState([]);
     const [potDbScalAfterSpline,setPotDbScalAfterSpline]=useState([]);
@@ -146,13 +152,20 @@ export default function Home(){
         setLonOrigen(Number(e.target.value));
     }
     const verificarCoord = (e)=>{
+        setTouched(true);           // Se modificó por primera vez coordenadas
         if((latOrigen>=-90 && latOrigen<=90) && (lonOrigen>=-90 && lonOrigen<=90)){
-            setValidCoord(true);
-            setTouched(true);
+            setCoordState(prevState => ({
+                ...prevState,
+                validCoord: true,                               //Coordenadas válidas
+                validCoordToogle: !prevState.validCoordToogle  //Nuevas coordenadas
+            }));
             console.log('Validas coord')
         }else{
-            setValidCoord(false);
-            setTouched(true);
+            setCoordState(prevState => ({
+                ...prevState,
+                validCoord: false,
+                validCoordToogle: !prevState.validCoordToogle
+            }));
             console.log('Invalidas coordenadas')
         }
         
@@ -307,6 +320,15 @@ export default function Home(){
         console.log('Interpolando despues de predicción');
         handleApplyInterpol();    
     },[predictionDone])
+
+    useEffect(()=>{
+        console.log('Interpolando despues de cambio de coords valido');
+        if (doInterpolAfterCoordToogle==true){
+            handleApplyInterpol();
+            setDoInterpolAfterCoordToogle(false);    
+        }
+    },[doInterpolAfterCoordToogle])
+
 
     //! ///////////////////// OKUMURA INPUTS ////////////////////////////////////////////
         const txAntennaChange = (e)=>{
@@ -484,7 +506,6 @@ export default function Home(){
     //! ///////////////////////////////////////////////////////////////
 
     useEffect(()=>{
-        
         if(dataCSV){
             setHeaders(dataCSV[0]);
             const rows = dataCSV.filter(row => 
@@ -494,10 +515,8 @@ export default function Home(){
             let temporal=0;
             let menor=0;
             let menorpos=0;
-
             let dist=[];
             let ang=[];
-
             let pot=[];
             let lat=[];
             let lon=[];
@@ -508,13 +527,12 @@ export default function Home(){
             setStaticCsv(false);
             setDbPrediction([]);
 
-
             // let lat1 = -16.426006833333332; 
             let lat1 = latOrigen * Math.PI / 180;          //Origen geográfico conocido de la señal
             // let lon1 = -71.57327866666667; 
             let lon1 = lonOrigen * Math.PI / 180;           //Origen geográfico conocido de la señal
 
-            if (rows[0]) {
+            if (rows[0]) {                                  // 'Modo estatico:',staticMode
                 rows[0].forEach(column => {
                     if (typeof column === 'string' && column.toLowerCase().includes('grado')) {
                         staticMode = true;
@@ -522,7 +540,6 @@ export default function Home(){
                     }
                 });
             }
-            // console.log('Modo estatico:',staticMode);
 
             if(staticMode === false){  //Receptor con capturas variables, radios variables
                 setStaticCsv(false);
@@ -589,7 +606,6 @@ export default function Home(){
                         ang[x-1] =rows[x][1]
                     }
                     if(freq){
-                        // console.log('Frecuencia detectada:', freq[0])
                         if(frequency!=freq[0]){
                             // console.log('cambio de freq',{frequency},{frequencyLocal})
                             setOkumuraValueInputs({txHeight: undefined, rxHeight: undefined, citySize:undefined, areaType:undefined});
@@ -644,7 +660,7 @@ export default function Home(){
             //! Escalar los demás valores al de distancia máxima :Hallar potencia en transmisor :Potenciatx = Potrx + PathLoss
             setDbOriginal(pot);  //Guardar la pot original sin escalar
 
-            if(selectedModel===0){  // Modelo FSPL
+            if(selectedModel===0){  // Modelo Free Space Path Loss
                 for (let x = 0; x < csvDataLong-1; x++) {
                     if (dist[x] == distmax) {                  
                         listadbscal[x] = pot[x];
@@ -665,7 +681,7 @@ export default function Home(){
                 }		
                 setPotTxEstimated(potEstOrigen);
             }
-            else if(selectedModel===1){ // Modelo Okumura
+            else if(selectedModel===1){ // Modelo Okumura-Hata
                 if(okumuraReady==true){
                     for (let x = 0; x < csvDataLong-1; x++) {
                         let ahm=0;
@@ -767,9 +783,7 @@ export default function Home(){
                 setMinPot(minDb);
                 setMinTheta(minTheta);
                     
-
-            //! ////////////////////		GRAFICO POLAR		////////////////
-
+            //! ////////////////////		GRAFICO POLAR		/////////////////////
             const datagraph = [
                 {   type: 'scatterpolar',
                     r: dbScalSorted,
@@ -782,11 +796,25 @@ export default function Home(){
                 }
             ];
             setData(datagraph);
+
         }
         else{
             setOkumuraCompatibleMessageShow(false); //Mensaje de "okumura incompatible" oculto
         }
-    },[dataCSV,frequency,selectedModel,okumuraReady])
+
+        console.log('coordState.validCoordToogle',coordState.validCoordToogle);
+        if(coordState.validCoord){
+            console.log('validCoordToogle cambio: theta:',thetaAfterSpline.length)
+            if(thetaAfterSpline.length!=0){ //SI hay una interpolación realizada antes
+                console.log('SI hay una interpolación realizada antes')
+                setDoInterpolAfterCoordToogle(true);
+            }else if(thetaAfterSpline.length==0){//NO hay una interpolación realizada antes
+                console.log('BI hay una interpolación realizada antes')
+                setDoInterpolAfterCoordToogle(false);
+            }
+        }
+        
+    },[dataCSV,frequency,selectedModel,okumuraReady,coordState])
 
 
 
@@ -1030,14 +1058,14 @@ useEffect(()=>{
                             <button id='saveCoord' onClick={verificarCoord}> GUARDAR</button>
                         </div>
                         
-                        {touched && !validCoord && <h5 className='invalidCoord'>INGRESE COORDENADAS VÁLIDAS: Lat y Long:(-90 a 90)</h5>}
-                        {touched && validCoord && <h5 className='validCoord'>COORDENADAS VÁLIDAS</h5>}
+                        {touched && !coordState.validCoord && <h5 className='invalidCoord'>INGRESE COORDENADAS VÁLIDAS: Lat y Long:(-90 a 90)</h5>}
+                        {touched && coordState.validCoord && <h5 className='validCoord'>COORDENADAS VÁLIDAS</h5>}
                         
                     </div>
                     <div className='uploader1'>
                         <h3>IMPORTAR CSV PARA ANÁLISIS:</h3>
                         <h4>(Ingrese coordenadas primero -16.426006833333332,-71.57327866666667)</h4>
-                        { touched && validCoord && <input type='file' name ='file' accept='.csv' onChange={handleFileChange} className='inputFile'  disabled={!(validCoord && touched)} ></input>    }
+                        { touched && coordState.validCoord && <input type='file' name ='file' accept='.csv' onChange={handleFileChange} className='inputFile'   ></input>    }
                         
                     </div>
                     <div className='freqContainer'>
