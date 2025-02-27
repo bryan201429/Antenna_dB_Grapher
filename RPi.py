@@ -16,7 +16,7 @@ np.set_printoptions(threshold=np.inf)
 sdr = RtlSdr()
 
 sdr.sample_rate = 2.4e6 # configure device
-sdr.center_freq = 102.3e6
+sdr.center_freq = 430.0e6
 freqMhz=sdr.center_freq/1e6
 sdr.gain = 0
 sdr.set_bandwidth(2.5e3)
@@ -151,7 +151,7 @@ while bucle==True:
 		#	print('RAW SAMPLES',samples)
 			potencia = np.mean(np.abs(samples)**2)
 			pot_db = 10*np.log10(potencia)
-			print('POTENCIA PROM DE MUESTRAS: ',pot_db)
+			# print('POTENCIA PROM DE MUESTRAS: ',pot_db)
 			db_samples[x]=pot_db
 #			print(db_samples[x])       #MUESTRAS OBTENIDAS
 		print(db_samples)
@@ -183,7 +183,7 @@ while bucle==True:
 			promedio=promedio+db_samples_not_outliers[i]
 		promedio=promedio/len(db_samples_not_outliers)
 	#print('Longitud de muestras sin outliers: ',len(db_samples_not_outliers))
-		print('Promedio de mediciones SIN OUTLIERS:', promedio)
+		print('Promedio de mediciones SIN OUTLIERS:', promedio, ' LAT:',lat,',LONG: ',lng)
 		#sdr.close()
 
 	##!####CSV Escritura################
@@ -269,6 +269,8 @@ while bucle==True:
 					dictwriter_object.writeheader()  # Escribir encabezados si está vacío
 
 				dictwriter_object.writerow(dict)
+
+
 
 	if  entrada=='3':
 		bucle=0
