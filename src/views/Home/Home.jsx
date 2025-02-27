@@ -10,6 +10,8 @@ import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import html2canvas from "html2canvas";
 import autoTable from "jspdf-autotable";
+import excelIcon from "../../assets/excelIcon.png";
+import pdfIcon from "../../assets/pdfIcon.png";
 
 export default function Home(){
     const [dataCSV,setDataCSV]=useState(); 
@@ -1232,9 +1234,8 @@ useEffect(()=>{
                     </div>
                     <h3>EXPORTAR RESULTADOS:</h3>
                     <div className='exportBox'>
-                        <button className='excelButton' onClick={exportToExcel}>Exportar a Excel</button>
-
-                        <button onClick={exportToPDF}>Exportar a PDF</button>
+                        <button className='excelButton' onClick={exportToExcel}>EXPORTAR A EXCEL <img src={excelIcon}/></button>
+                        <button className='pdfButton' onClick={exportToPDF}>EXPORTAR A PDF <img src={pdfIcon}/></button>
                     </div>
                 </div>
             </div>

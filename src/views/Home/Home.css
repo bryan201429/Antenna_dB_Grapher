@@ -330,7 +330,8 @@ input[type=file]::file-selector-button {
 
 .dbMaxMinInfoContainer{
     width: 100%;
-    background: linear-gradient(135deg, rgba(10, 10, 10, 0.8), rgba(30, 30, 30, 0.65));
+    background: linear-gradient(135deg, rgba(10, 10, 10, 0.9), rgba(30, 30, 30, 0.75));
+    /* background: rgba(10, 10, 10, 0.8); */
     backdrop-filter: blur(10px);
     border-radius: 5px;
     padding-bottom: 5px;
@@ -370,20 +371,18 @@ input[type=file]::file-selector-button {
 }
 .dataTable{
     background-color: rgb(20, 20, 20,0.9);
-    /* margin: 2vw; */
-    /* backdrop-filter: blur(5px); */
     width: 45vw;
     height: 60vh;
     color: rgb(255, 255, 255);
     z-index: 1;
     border: 1px solid #7c7c7c;
-    /* margin-top: 7vh; */
+    margin-top: 5px;
 }
 .dataTable th, .dataTable td {
     border: 1px solid #797979;
-    padding: 3px;
-    padding-left: 10px;
-    padding-right: 10px;
+    padding: 2px;
+    padding-left: 4px;
+    padding-right: 4px;
     text-align: center;
     width: fit-content;
 }
@@ -474,4 +473,27 @@ input:checked + .slider:before {
     border: 0px;
     border-radius: 2px;
     padding: 10px;
+    width: 28%;
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    font-size: large;
+}
+
+.pdfButton{
+    background-color: #d62405;
+    border: 0px;
+    border-radius: 2px;
+    padding: 10px;
+    width: 28%;
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    font-size: large;
+}
+.exportBox{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
 }
