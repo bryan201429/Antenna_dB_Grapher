@@ -66,8 +66,7 @@ while bucle==True:
 				samples = sdr.read_samples(cant_muestras)
 				potencia = np.mean(np.abs(samples)**2)
 				pot_db = 10*np.log10(potencia)
-
-				print('POTENCIA PROM DE MUESTRAS: ',pot_db)
+				# print('POTENCIA PROM DE MUESTRAS: ',pot_db)
 				db_samples[x]=pot_db
 				#print(db_samples[x])       #MUESTRAS OBTENIDAS
 
@@ -82,7 +81,6 @@ while bucle==True:
 				print(i)
 				if s[i] <2:
 					db_samples_not_outliers.append(db_samples[i])
-			
 				else:
 					continue
         	#print("MUESTRAS ORIGINALES",db_samples)
@@ -101,8 +99,7 @@ while bucle==True:
 				promedio=promedio+db_samples_not_outliers[i]
 
 			promedio=promedio/len(db_samples_not_outliers)
-
-			print('Promedio de mediciones SIN OUTLIERS:', promedio)
+			# print('Promedio de mediciones SIN OUTLIERS:', promedio)
 
         	##!####CSV Escritura################
 			if csvContinuidad != 0:
@@ -128,7 +125,9 @@ while bucle==True:
 		sdr.close()
 
 	if entrada=="1":
-		print("Se realizara medición")
+		print("Se realizara medición individual")
+		positionlock = 0  # 🔹 Reiniciar cada vez antes de medir
+		
 		while positionlock==0:
 			port="/dev/ttyAMA0"
 			ser=serial.Serial(port, baudrate=9600, timeout=0.1)
