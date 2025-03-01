@@ -669,7 +669,7 @@ export default function Home(){
                         let FSPL=(20*Math.log10(Math.abs(dist[x])))+(20*Math.log10(frequencyLocal*10**6))+(20*Math.log10(4 * Math.PI / c));
                         potEstOrigen[x]= pot[x] + FSPL;
                     }
-                    else if(Math.abs(dist[x]) < (c/(frequencyLocal*10**6))/(4 * Math.PI )){  //Distancias cortas no aplica FSPL (sin perdida teórica)
+                    else if(Math.abs(dist[x]) < (c/(frequencyLocal*10**6))/(4 * Math.PI )){  //Distancias muy cortas no aplica FSPL (sin perdida teórica)
                          listadbscal[x] = pot[x];
                          let FSPL=(20*Math.log10(Math.abs(dist[x])))+(20*Math.log10(frequencyLocal*10**6))+(20*Math.log10(4 * Math.PI / c));
                          potEstOrigen[x]= pot[x] + FSPL;
@@ -1065,7 +1065,7 @@ useEffect(()=>{
                         
                     </div>
                     <div className='uploader1'>
-                        <h3>IMPORTAR CSV PARA ANÁLISIS:</h3>
+                        <h3>IMPORTAR CSV PARA ANÁLISIS</h3>
                         <h4>(Ingrese coordenadas primero -16.426006833333332,-71.57327866666667)</h4>
                         { touched && coordState.validCoord && <input type='file' name ='file' accept='.csv' onChange={handleFileChange} className='inputFile'   ></input>    }
                         
@@ -1078,7 +1078,7 @@ useEffect(()=>{
                     {staticCsv && <h3 className='staticCSVText'> Muestras tomadas a una misma distancia (radio) y ángulos (theta) equidistantes </h3>}
 
                     <div className='propagationBox'>
-                        <h3>MODELO DE PROPAGACIÓN:</h3>
+                        <h3>MODELO DE PROPAGACIÓN (ESCALAMIENTO)</h3>
                         <div className='selectModelPropagation'>
                         
                             <h4>Seleccione un modelo de propagación: </h4>
@@ -1088,7 +1088,7 @@ useEffect(()=>{
                                     FSPL
                                 </label>
                                 <label>
-                                    <input type="radio" name="opcion" value="2" onChange={() => {setSelectedModel(1); }} checked={selectedModel === 1}/>
+                                    <input type="radio" name="opcion" value="2" onChange={() => {setSelectedModel(1); }} checked={selectedModel === 1}  disabled={okumuraCompatibleMessageShow}  />
                                     Okumura-Hata
                                 </label>
                             </div>
@@ -1148,11 +1148,25 @@ useEffect(()=>{
                 
             </div>
                 <div className='secondRowContainer'>
+                <div className='interpolationBox'>
+                        <div className='interpolationEnableBox'>
+                            <h3 >INTERPOLACIÓN</h3>
+                            {/* <label className="toggleSwitch">
+                                <input type="checkbox" id="interpolationCheck" checked={interEnabled} onChange={handleCheckboxChange}/>
+                                <span className="slider"></span>
+                            </label> */}
+                        </div>
+                        <div className='interpolationPointsBox'>
+                            Puntos de interpolación deseados:
+                            <input id='interpolationPoints' type="number" onChange={handleInputInterpolChange}/>
+                        </div>
+                        <button id='interpolButton' onClick={handleApplyInterpol}>Aplicar Interpolación </button>
+                    </div>
                 <div className='predictionBox'>
                         <h3>ESTIMACIÓN </h3>
                         <div className='selectModelPropagation'>
                         
-                        <h4>Seleccione un modelo de propagación: </h4>
+                        <h4>Seleccione un modelo de propagación para estimación: </h4>
                         <div>
                             <label>
                                 <input type="radio" name="predictionOption" value="1" onChange={() => {setMinDistancePrediction(0); setDistanceToScal(0); setSelectedModelPrediction(0); }} checked={selectedModelPrediction === 0}/>
@@ -1209,7 +1223,7 @@ useEffect(()=>{
                         {okumuraReadyPrediction && <h3 className='successMessage'>Datos para predicción válidos</h3>}
                         <button className='applyOkumuraButton' onClick={handleApplyPrediction}> Confirmar datos para Modelo de predicción</button>
                     </div>}
-                        <div>
+                        <div className='distanciaEstimacionBox'>
                             <label>Ingrese una distancia de estimación (m):</label>
                             <input type='range' name='distancia' min={minDistancePrediction} max={maxDistancePrediction} step='0.5' value={distanceToScal} onChange={handleSliderChange} id='slideInput'></input>
                             <input type='textbox' id='inputTextBox' min={minDistancePrediction} max={maxDistancePrediction} value={distanceToScal} onChange={handleTextBoxChange}></input>
@@ -1217,20 +1231,6 @@ useEffect(()=>{
                             <button id='predictionButton' onClick={handlePredictionClick}>APLICAR</button>
                         </div>
                         
-                    </div>
-                    <div className='interpolationBox'>
-                        <div className='interpolationEnableBox'>
-                            <h3 >INTERPOLACIÓN</h3>
-                            {/* <label className="toggleSwitch">
-                                <input type="checkbox" id="interpolationCheck" checked={interEnabled} onChange={handleCheckboxChange}/>
-                                <span className="slider"></span>
-                            </label> */}
-                        </div>
-                        <div className='interpolationPointsBox'>
-                            Puntos de interpolación deseados:
-                            <input id='interpolationPoints' type="number" onChange={handleInputInterpolChange}/>
-                        </div>
-                        <button id='interpolButton' onClick={handleApplyInterpol}>Aplicar Interpolación </button>
                     </div>
                     <h3>EXPORTAR RESULTADOS:</h3>
                     <div className='exportBox'>

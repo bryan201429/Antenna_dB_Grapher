@@ -165,14 +165,22 @@ input[type=file]::file-selector-button {
 #predictionButton{
     margin-right: 20px;
     border: none;
-    background: #b38117;
+    background: #c4a30f;
     padding: 10px 20px;
     border-radius: 5px;
     color: #fff;
     cursor: pointer;
     transition: background .1s ease-in-out;
-    margin-left: auto;
-    margin-right: auto;
+    /* width: auto; */
+}
+.distanciaEstimacionBox{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    /* background-color: red; */
+    padding: 0;
+    margin: 0;
 }
 .plotChart{
     width: 100%;
@@ -284,9 +292,10 @@ input[type=file]::file-selector-button {
     justify-content: space-evenly;
     width: 100%;
     padding-bottom: 5px;
-    border-top: solid 1px;
+    /* border-top: solid 1px; */
     border-bottom: solid 1px;
     box-sizing: border-box;
+    margin-top: 10px;
 }
 .interpolationEnableBox{
     display: flex;
@@ -473,11 +482,14 @@ input:checked + .slider:before {
     border: 0px;
     border-radius: 2px;
     padding: 10px;
-    width: 28%;
+    width: 30%;
     display: flex;
     align-items: center;
     justify-content: space-evenly;
     font-size: large;
+}
+.excelButton:hover{
+    cursor: pointer;
 }
 
 .pdfButton{
@@ -485,11 +497,14 @@ input:checked + .slider:before {
     border: 0px;
     border-radius: 2px;
     padding: 10px;
-    width: 28%;
+    width: 30%;
     display: flex;
     align-items: center;
     justify-content: space-evenly;
     font-size: large;
+}
+.pdfButton:hover{
+    cursor: pointer;
 }
 .exportBox{
     display: flex;
