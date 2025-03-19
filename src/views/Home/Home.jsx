@@ -120,7 +120,45 @@ export default function Home(){
             autosize: true,
             paper_bgcolor: 'rgba(30,30,30,0.9)', // Fondo general del gráfico
             title: {
-                text: 'Radiation Pattern (Polar Plot)',
+                text: 'Patrón de radiación (Data original)',
+                font: { color: 'white' }
+            },
+            hovermode: 'closest',
+            hoverlabel: {
+                bgcolor: '#444',
+                font: {
+                    color: 'white',
+                    size: 12,
+                },
+            },
+            dragmode: 'zoom',  // Asegúrate de que el dragmode esté activado
+            
+        };
+        const layoutInterpol = {
+            polar: {
+                radialaxis: {
+                    visible: true,
+                    range: [minPotForScale , maxPotForScale +0.5], // Rango inicial del eje radial
+                    tickfont: { color: 'white' },
+                    gridcolor: 'white',
+                    linecolor: 'white',
+                },
+                angularaxis: {
+                    visible: true,
+                    gridcolor: 'white',
+                    tickfont: { color: 'white' },
+                    title: {
+                        text: 'Angular Axis',
+                        font: { color: 'white' }
+                    },
+                },
+                bgcolor: 'rgba(30,30,30,0.9)', // Fondo bajo el gráfico
+            },
+            showlegend: false,
+            autosize: true,
+            paper_bgcolor: 'rgba(30,30,30,0.9)', // Fondo general del gráfico
+            title: {
+                text: 'Patrón de radiación (Data interpolada)',
                 font: { color: 'white' }
             },
             hovermode: 'closest',
@@ -235,7 +273,6 @@ export default function Home(){
                     splineTheta.push(theta[i] + delta * j);
                 }
             } else {    // Agregar el último valor de theta
-                
                 splineTheta.push(theta[i]);
             }
         }
@@ -302,7 +339,7 @@ export default function Home(){
                     color: '#rgba(0,220,100,1)',
                     width: 3
                   },
-                  hoverinfo: 'r+theta+name', // Incluye el nombre para más contexto
+                hoverinfo: 'r+theta+name', // Incluye el nombre para más contexto
                 //   name: 'I + theta', // Nombre que aparecerá en el hover
                 //   hoverlabel: {
                 //       bgcolor: '#000', // Fondo del cuadro de hover
@@ -585,7 +622,7 @@ export default function Home(){
                     let dlon=lon2-lon1;
                     let dlat=lat2-lat1;
 
-                    let a=Math.sin(dlat/2)*Math.sin(dlat/2)+Math.cos(lon1)*Math.cos(lon2)*Math.sin(dlon/2)*Math.sin(dlon/2);
+                    let a = Math.sin(dlat/2)*Math.sin(dlat/2)+Math.cos(lat1)*Math.cos(lat2)*Math.sin(dlon/2)*Math.sin(dlon/2);
                     let c = 2 * Math.atan2(Math.sqrt(Math.abs(a)), Math.sqrt(1 - a));
                     let Base=6371*c*1000;
 
@@ -790,11 +827,13 @@ export default function Home(){
                 {   type: 'scatterpolar',
                     r: dbScalSorted,
                     theta: angSorted,
+                    mode: 'lines+markers',
                     fill: 'toself',
                     line: {
                         color: '#rgba(250,70,0,1)',
-                        width: 2
-                      }
+                        width: 3
+                      },
+                    hoverinfo: 'r+theta+name', // Incluye el nombre para más contexto
                 }
             ];
             setData(datagraph);
@@ -1066,7 +1105,7 @@ useEffect(()=>{
                     </div>
                     <div className='uploader1'>
                         <h3>IMPORTAR CSV PARA ANÁLISIS</h3>
-                        <h4>(Ingrese coordenadas primero -16.426006833333332,-71.57327866666667)</h4>
+                        <h4>(Ingrese coordenadas primero -16.426009185942572, -71.57327162130076)</h4>
                         { touched && coordState.validCoord && <input type='file' name ='file' accept='.csv' onChange={handleFileChange} className='inputFile'   ></input>    }
                         
                     </div>
@@ -1251,9 +1290,9 @@ useEffect(()=>{
                         config={{ 
                             responsive: true,
                             useResizeHandler: true,
-                            scrollZoom: true, // Permite zoom con la rueda del ratón
-                            displayModeBar: true, // Muestra la barra de herramientas
-                            editable: true, // Permite editar el gráfico
+                            // scrollZoom: true, // Permite zoom con la rueda del ratón
+                            // displayModeBar: true, // Muestra la barra de herramientas
+                            // editable: true, // Permite editar el gráfico
                         }}
                         className="plotChart"
                         />
@@ -1265,7 +1304,7 @@ useEffect(()=>{
                     </div>
                     <table className='dataTable'>
                         <thead>
-                            <th>Sample</th>
+                            <th>N°</th>
                             <th>Theta (°)</th>
                             <th>Dist. Original</th>
                             <th>Pot. Medida</th>
@@ -1298,7 +1337,7 @@ useEffect(()=>{
                             id='chart2'
                             
                             data={dataSpline}
-                            layout={layout}
+                            layout={layoutInterpol}
                             config={{ responsive: true, useResizeHandler:true }}
                             useResizeHandler={true}
                             className='plotChart'
@@ -1310,7 +1349,7 @@ useEffect(()=>{
                     </div>
                     <table className='dataTable'>
                             <thead>
-                                <th>Sample</th>
+                                <th>N° </th>
                                 <th>Theta (°)</th>
                                 <th>Dist. Original</th>
                                 <th>Pot. Medida</th>
