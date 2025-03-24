@@ -566,9 +566,7 @@ export default function Home(){
             setStaticCsv(false);
             setDbPrediction([]);
 
-            // let lat1 = -16.426006833333332; 
             let lat1 = latOrigen * Math.PI / 180;          //Origen geográfico conocido de la señal
-            // let lon1 = -71.57327866666667; 
             let lon1 = lonOrigen * Math.PI / 180;           //Origen geográfico conocido de la señal
 
             if (rows[0]) {                                  // 'Modo estatico:',staticMode
@@ -609,7 +607,7 @@ export default function Home(){
                         setOkumuraSettingsPredictionVisibility(false)
                         setMinDistancePrediction(0)
                         }
-                        setFrequency(freq[0])
+                        setFrequency(Number(freq[0]))
                         frequencyLocal=Number(freq[0]);
                 }
        
@@ -630,11 +628,6 @@ export default function Home(){
                     Math.sin(lon2-lon1)*Math.cos(lat2));
                     
                     Bearing=((Bearing * 180 / Math.PI + 360) % 360);
-                    // let Bearing = Math.atan2(
-                    //     Math.sin(lon2 - lon1) * Math.cos(lat2),
-                    //     Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(lon2 - lon1)
-                    // );
-                    // Bearing = ((Bearing * 180 / Math.PI + 360) % 360);
 
                     dist[x]=Base;   
                     ang[x]=Bearing;
@@ -669,7 +662,7 @@ export default function Home(){
                             setOkumuraSettingsPredictionVisibility(false)
                             setMinDistancePrediction(0)
                             }
-                            setFrequency(freq[0])
+                            setFrequency(Number(freq[0]))
                             frequencyLocal=Number(freq[0]);
                     }
             }
