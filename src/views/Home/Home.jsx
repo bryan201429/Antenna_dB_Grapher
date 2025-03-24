@@ -707,8 +707,9 @@ export default function Home(){
                     }
                     else if(Math.abs(dist[x]) < (c/(frequencyLocal*10**6))/(4 * Math.PI )){  //Distancias muy cortas no aplica FSPL (sin perdida teórica)
                          listadbscal[x] = pot[x];
-                         let FSPL=(20*Math.log10(Math.abs(dist[x])))+(20*Math.log10(frequencyLocal*10**6))+(20*Math.log10(4 * Math.PI / c));
-                         potEstOrigen[x]= pot[x] + FSPL;
+                        //  let FSPL=(20*Math.log10(Math.abs(dist[x])))+(20*Math.log10(frequencyLocal*10**6))+(20*Math.log10(4 * Math.PI / c));
+                        //  potEstOrigen[x]= pot[x] + FSPL;
+                         potEstOrigen[x]= pot[x];
                      }
                     else if (dist[x]<distmax) {
                         let FSPL=(20*Math.log10(Math.abs(dist[x])))+(20*Math.log10(frequencyLocal*10**6))+(20*Math.log10(4 * Math.PI / c));
