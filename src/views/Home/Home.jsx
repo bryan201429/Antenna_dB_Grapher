@@ -356,12 +356,12 @@ export default function Home(){
     }
 
     useEffect(()=>{
-        console.log('Interpolando despues de predicción');
+        // console.log('Interpolando despues de predicción');
         handleApplyInterpol();    
     },[predictionDone])
 
     useEffect(()=>{
-        console.log('Interpolando despues de cambio de coords valido');
+        // console.log('Interpolando despues de cambio de coords valido');
         if (doInterpolAfterCoordToogle==true){
             handleApplyInterpol();
             setDoInterpolAfterCoordToogle(false);    
@@ -483,8 +483,8 @@ export default function Home(){
                 }
                 
                 useEffect(()=>{
-                    console.log({okumuraValueInputsPrediction})
-                    console.log({okumuraReadyPrediction})
+                    // console.log({okumuraValueInputsPrediction})
+                    // console.log({okumuraReadyPrediction})
                 },[okumuraReadyPrediction])
                 
     const handlePredictionClick=()=>{                               
@@ -585,7 +585,7 @@ export default function Home(){
                     lat[x-1]=rows[x][1];
                     lon[x-1]=rows[x][2];
                     // alt[x-1]=rows[x][3];
-                    freq[x-1]=rows[x][3];
+                    freq[x-1]=rows[x][4];
                 }
                 if(freq){
                     console.log('Frecuencia detectada:', freq[0])
@@ -629,8 +629,8 @@ export default function Home(){
                     
                     Bearing=((Bearing * 180 / Math.PI + 360) % 360);
 
-                    dist[x]=Base;   
-                    ang[x]=Bearing;
+                    dist[x]=Number(Base);
+                    ang[x]=Number(Bearing);
                 }
             }
             else if(staticMode === true){
@@ -675,7 +675,7 @@ export default function Home(){
             let distmax=0;
             let distmin = Infinity;
         
-            for(let x=0;x<csvDataLong-1;x++){   //Hallar distancia más lejana
+            for(let x=0; x<csvDataLong-1; x++){   //Hallar distancia más lejana
                 if(dist[x]>distmax){
                     distmax=dist[x];
                     setMaxDistance(dist[x]);
@@ -699,23 +699,26 @@ export default function Home(){
             setDbOriginal(pot);  //Guardar la pot original sin escalar
 
             if(selectedModel===0){  // Modelo Free Space Path Loss
+                console.log({dist});
                 for (let x = 0; x < csvDataLong-1; x++) {
                     if (dist[x] == distmax) {                  
                         listadbscal[x] = pot[x];
                         let FSPL=(20*Math.log10(Math.abs(dist[x])))+(20*Math.log10(frequencyLocal*10**6))+(20*Math.log10(4 * Math.PI / c));
                         potEstOrigen[x]= pot[x] + FSPL;
+                        console.log('case 1, dist: ',dist[x],{FSPL},{frequencyLocal})
                     }
                     else if(Math.abs(dist[x]) < (c/(frequencyLocal*10**6))/(4 * Math.PI )){  //Distancias muy cortas no aplica FSPL (sin perdida teórica)
                          listadbscal[x] = pot[x];
-                        //  let FSPL=(20*Math.log10(Math.abs(dist[x])))+(20*Math.log10(frequencyLocal*10**6))+(20*Math.log10(4 * Math.PI / c));
-                        //  potEstOrigen[x]= pot[x] + FSPL;
                          potEstOrigen[x]= pot[x];
+                         console.log('case 2');
                      }
                     else if (dist[x]<distmax) {
-                        let FSPL=(20*Math.log10(Math.abs(dist[x])))+(20*Math.log10(frequencyLocal*10**6))+(20*Math.log10(4 * Math.PI / c));
+                        let FSPL =(20*Math.log10(Math.abs(dist[x])))+(20*Math.log10(frequencyLocal*10**6))+(20*Math.log10(4 * Math.PI / c));
                         let FSPL2=(20*Math.log10(Math.abs(distmax)))+(20*Math.log10(frequencyLocal*10**6))+(20*Math.log10(4 * Math.PI / c));
                         listadbscal[x] =  pot[x]+FSPL-FSPL2;
                         potEstOrigen[x]= pot[x] + FSPL;
+                        console.log('case 3, dist: ',dist[x],{frequencyLocal});
+                        console.log({FSPL},{FSPL2})
                     }
                 }		
                 setPotTxEstimated(potEstOrigen);
