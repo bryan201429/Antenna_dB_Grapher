@@ -810,7 +810,7 @@ export default function Home(){
                 // console.log('Lista db original:', potSorted);
 
                 //Encontrar el valor máx de pot de la data spline:
-                const { maxDb, maxTheta } = potDbScal.reduce(
+                const { maxDb, maxTheta } = dbScalSorted.reduce(
                     (acc, db, i) => db > acc.maxDb ? { maxDb: db, maxTheta: angSorted[i] } : acc, //condicion
                     { maxDb: -Infinity, maxTheta: 0 }   //valores iniciales
                 );
@@ -818,7 +818,7 @@ export default function Home(){
                 setMaxTheta(maxTheta);
                 
                 //Encontrar el valor min de pot de la data spline:
-                const { minDb, minTheta } = potDbScal.reduce(
+                const { minDb, minTheta } = dbScalSorted.reduce(
                     (acc, db, i) => db < acc.minDb ? { minDb: db, minTheta: angSorted[i] } : acc, //condicion
                     { minDb: Infinity, minTheta: 0 }   //valores iniciales
                     );
@@ -1108,7 +1108,7 @@ useEffect(()=>{
                     </div>
                     <div className='uploader1'>
                         <h3>IMPORTAR CSV PARA ANÁLISIS</h3>
-                        <h4>(Ingrese coordenadas primero -16.426009185942572, -71.57327162130076)</h4>
+                        <h4>( Ingrese coordenadas primero )</h4>
                         { touched && coordState.validCoord && <input type='file' name ='file' accept='.csv' onChange={handleFileChange} className='inputFile'   ></input>    }
                         
                     </div>
