@@ -12,6 +12,7 @@ import html2canvas from "html2canvas";
 import autoTable from "jspdf-autotable";
 import excelIcon from "../../assets/excelIcon.png";
 import pdfIcon from "../../assets/pdfIcon.png";
+import Map from "../../components/map/Map";
 
 export default function Home(){
     const [dataCSV,setDataCSV]=useState(); 
@@ -81,6 +82,8 @@ export default function Home(){
     const [maxDistancePrediction,setMaxDistancePrediction ]= useState(10000);
 
 
+    
+
     const c=2.99792458e8;
     const [frequency,setFrequency]=useState(undefined);
     const [data,setData]=useState([
@@ -134,11 +137,11 @@ export default function Home(){
             dragmode: 'zoom',  // Asegúrate de que el dragmode esté activado
             
         };
-        const layoutInterpol = {
+        const layoutInterpol =  {
             polar: {
                 radialaxis: {
                     visible: true,
-                    range: [minPotForScale , maxPotForScale +0.5], // Rango inicial del eje radial
+                    range: [minPotForScale , maxPotForScale +2.0], // Rango inicial del eje radial
                     tickfont: { color: 'white' },
                     gridcolor: 'white',
                     linecolor: 'white',
@@ -794,8 +797,8 @@ export default function Home(){
                 const potEstSorted = combinedData.map(item => item.potEst);
 
                 // Actualiza los estados con los valores ordenados
-                setTheta(angSorted);
-                setPotDbScal(dbScalSorted);
+                setTheta(angSorted);                //Angulos ordenados
+                setPotDbScal(dbScalSorted);         //Potencia escalada
                 setDistances(distSorted);
                 setDbOriginal(potSorted);
                 setPotTxEstimated(potEstSorted);
@@ -840,7 +843,6 @@ export default function Home(){
                 }
             ];
             setData(datagraph);
-
         }
         else{
             setOkumuraCompatibleMessageShow(false); //Mensaje de "okumura incompatible" oculto
@@ -1281,9 +1283,10 @@ useEffect(()=>{
                     </div>
                 </div>
             </div>
-            <div className='tablesContainer' >
 
-            
+
+
+            <div className='tablesContainer' >
                 <div className='tableContainer' >
                     <div className='graphContainer' ref={plotRef1}>
                         <Plot
@@ -1383,6 +1386,13 @@ useEffect(()=>{
             </div>
             {okumuraErrorFlag && <ErrorModal errorFlag={okumuraErrorFlag} message="Verificar los datos del modelo de Okumura" setErrorFlag={SetokumuraErrorFlag}/>}
             {okumuraErrorFlagPrediction && <ErrorModal errorFlag={okumuraErrorFlagPrediction} message="Verificar datos para Predicción" setErrorFlag={SetokumuraErrorFlagPrediction}/>}
+
+            <div className='mapParent'>
+                <Map></Map>
+            </div>
+            
+            
+
         </div>
     )
 }
