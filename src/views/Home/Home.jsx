@@ -1388,7 +1388,7 @@ useEffect(()=>{
             {okumuraErrorFlagPrediction && <ErrorModal errorFlag={okumuraErrorFlagPrediction} message="Verificar datos para Predicción" setErrorFlag={SetokumuraErrorFlagPrediction}/>}
 
             <div className='mapParent'>
-                <Map></Map>
+                <Map latOrigen={latOrigen} lonOrigen={lonOrigen} theta={theta} potDbScal={potDbScal} />
             </div>
             
             

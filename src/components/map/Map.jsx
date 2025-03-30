@@ -1,49 +1,54 @@
-import React from "react";
-import { MapContainer, TileLayer, CircleMarker, Polyline } from "react-leaflet";
+import React, { useEffect } from "react";
+import { MapContainer, TileLayer, CircleMarker, Circle, useMap } from "react-leaflet";
 import 'leaflet/dist/leaflet.css';
-// 📍 Punto central (Antena)
-const lat0 = -16.409777;
-const lng0 = -71.528251;
 
-// 📡 Datos normalizados (Angulo en grados, Radio en metros)
-const data = [
-  { angle: 0, radius: 50 },
-  { angle: 45, radius: 80 },
-  { angle: 90, radius: 70 },
-  { angle: 135, radius: 90 },
-  { angle: 180, radius: 60 },
-  { angle: 225, radius: 50 },
-  { angle: 270, radius: 75 },
-  { angle: 315, radius: 85 },
-  { angle: 360, radius: 50 }, // Cerrar el círculo
-];
+const MapUpdater = ({ center }) => {
+  const map = useMap();
 
-// 📌 Convertir (ángulo, radio) → (lat, lng)
-const processedPoints = data.map(({ angle, radius }) => {
-  const radianAngle = (angle * Math.PI) / 180; // Convertir grados a radianes
+  useEffect(() => {
+    if (center) {
+      map.setView(center, map.getZoom());
+    }
+  }, [center, map]);
 
-  // Convertir radio en desplazamiento en lat/lng
-  const newLat = lat0 + (radius / 111111) * Math.sin(radianAngle);
-  const newLng = lng0 + (radius / (111111 * Math.cos((lat0 * Math.PI) / 180))) * Math.cos(radianAngle);
+  return null;
+};
 
-  return { lat: newLat, lng: newLng };
-});
+const scaleRadius = (dbm) => {
+  return Math.max(1, Math.pow(10, (dbm + 100) / 40)); // Evita radios negativos o muy pequeños
+};
 
-const MapComponent = () => {
+
+
+const MapComponent = ({ latOrigen, lonOrigen, theta, potDbScal }) => {
   return (
-    <MapContainer center={[lat0, lng0]} zoom={18} style={{ height: "100%", width: "100%" }}>
+    <MapContainer center={[latOrigen, lonOrigen]} zoom={18} style={{ height: "100%", width: "100%" }}>
+      <MapUpdater center={[latOrigen, lonOrigen]} />
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
       {/* 🔴 Punto central (Antena) */}
-      <CircleMarker center={[lat0, lng0]} radius={8} color="red" fillOpacity={0.8} />
+      <CircleMarker center={[latOrigen, lonOrigen]} radius={8} color="red" fillOpacity={0.8} />
 
-      {/* 🔵 Puntos del diagrama polar */}
-      {processedPoints.map((point, index) => (
-        <CircleMarker key={index} center={[point.lat, point.lng]} radius={5} color="blue" fillOpacity={0.8} />
-      ))}
+      {/* 🔵 Dibujar puntos basados en ángulos y potencias */}
+      {theta.map((angle, index) => {
+        const radianAngle = (angle * Math.PI) / 180; // Convertir ángulo a radianes
+        const radius = scaleRadius(potDbScal[index])*1; // Escalar potencia en radio
 
-      {/* 🔷 Línea conectando los puntos */}
-      <Polyline positions={processedPoints} color="blue" weight={2} />
+        // 📌 Convertir (ángulo, radio) a desplazamiento en lat/lng
+        const lat = latOrigen + (radius / 111111) * Math.sin(radianAngle);
+        const lon = lonOrigen + (radius / (111111 * Math.cos((latOrigen * Math.PI) / 180))) * Math.cos(radianAngle);
+
+        return (
+          <Circle
+            key={index}
+            center={[lat, lon]}
+            radius={2} // Fijar radio del marcador
+            color="blue"
+            fillColor="blue"
+            fillOpacity={0.5}
+          />
+        );
+      })}
     </MapContainer>
   );
 };
