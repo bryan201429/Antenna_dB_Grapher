@@ -38,6 +38,10 @@ export default function Home(){
     const [minTheta,setMinTheta] = useState(null);                              //Theta con pot mínimo de pot
     const [latOrigen,setLatOrigen] = useState(0);
     const [lonOrigen,setLonOrigen] = useState(0);
+    const [latOrigenMap,setLatOrigenMap] = useState(0);   // para mapa
+    const [lonOrigenMap,setLonOrigenMap] = useState(0);   // para mapa
+    const [latCsv,setLatCsv] = useState([]);        // para mapa
+    const [lonCsv,setLonCsv] = useState([]);        // para mapa
     const [validCoord,setValidCoord] = useState(false);
     const [validCoordToogle,setValidCoordToogle] = useState(false);
     const [doInterpolAfterCoordToogle,setDoInterpolAfterCoordToogle] = useState(false);
@@ -203,6 +207,8 @@ export default function Home(){
                 validCoordToogle: !prevState.validCoordToogle  //Nuevas coordenadas
             }));
             console.log('Validas coord')
+            setLatOrigenMap(latOrigen)
+            setLonOrigenMap(lonOrigen)
         }else{
             setCoordState(prevState => ({
                 ...prevState,
@@ -590,6 +596,8 @@ export default function Home(){
                     // alt[x-1]=rows[x][3];
                     freq[x-1]=rows[x][4];
                 }
+                setLatCsv(lat); //Guardar para enviar a Map
+                setLonCsv(lon); //Guardar para enviar a Map
                 if(freq){
                     console.log('Frecuencia detectada:', freq[0])
                     if(frequency!=freq[0]){
@@ -1388,7 +1396,7 @@ useEffect(()=>{
             {okumuraErrorFlagPrediction && <ErrorModal errorFlag={okumuraErrorFlagPrediction} message="Verificar datos para Predicción" setErrorFlag={SetokumuraErrorFlagPrediction}/>}
 
             <div className='mapParent'>
-                <Map latOrigen={latOrigen} lonOrigen={lonOrigen} theta={theta} potDbScal={potDbScal} />
+                <Map latOrigenMap={latOrigenMap} lonOrigenMap={lonOrigenMap} theta={theta} potDbScal={potDbScal} coordState={coordState.validCoord} maxDistance={maxDistance} latCsv={latCsv} lonCsv={lonCsv} />
             </div>
             
             
