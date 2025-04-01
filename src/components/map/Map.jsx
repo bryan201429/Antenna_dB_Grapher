@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { MapContainer, TileLayer, CircleMarker, Circle, useMap, Polyline, Polygon, Tooltip, LayersControl } from "react-leaflet";
+import { MapContainer, TileLayer, CircleMarker, Circle, useMap, Polyline, Polygon, Tooltip, LayersControl, Rectangle } from "react-leaflet";
 import 'leaflet/dist/leaflet.css';
 
 
@@ -87,7 +87,7 @@ const MapComponent = ({ latOrigenMap, lonOrigenMap, theta, potDbScal, coordState
 
       {/* 🟢 Dibujar puntos de latCsv y lonCsv con color verde */}
       {latCsv.map((lat, index) => (
-          <Circle key={`green-${index}`} center={[Number(lat), Number(lonCsv[index])]} radius={1.1} color="green" fillColor="green" fillOpacity={0.8} zIndexOffset={1000}>
+          <Circle key={`green-${index}`} center={[Number(lat), Number(lonCsv[index])]} radius={1.0} color="green" fillColor="green" fillOpacity={0.8} zIndexOffset={1000}>
           <Tooltip direction="top" offset={[0, -5]} opacity={1} >
             <span>N° {index + 1}<br />Lat: {Number(lat).toFixed(5)}<br />Lon: {Number(lonCsv[index]).toFixed(5)}</span>
           </Tooltip>
