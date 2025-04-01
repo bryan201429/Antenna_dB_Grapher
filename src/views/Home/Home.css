@@ -515,13 +515,21 @@ input:checked + .slider:before {
 
 .mapParent{
     background-color: red;
-    height: 800px;
+    height: fit-content;
+    min-height: fit-content;
     width: 96vw;
     margin: 0;
     padding: 20px;
     box-sizing: border-box;
     margin-top: 10px;
-    background-color: rgba(255, 255, 255, 0.5);
+    background-color: rgba(100, 100, 100, 0.8);
     backdrop-filter: blur(1px);
     border-radius: 10px;
+}
+.mapTitle{
+    margin: 0;
+    padding: 0;
+    margin-bottom: 5px;
+    width: 100%;
+    
 }

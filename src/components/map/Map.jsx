@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
-import { MapContainer, TileLayer, CircleMarker, Circle, useMap, Polyline } from "react-leaflet";
+import { MapContainer, TileLayer, CircleMarker, Circle, useMap, Polyline, Polygon, Tooltip, LayersControl } from "react-leaflet";
 import 'leaflet/dist/leaflet.css';
+
 
 // 📌 Componente para actualizar el mapa cuando cambian los valores
 const MapUpdater = ({ center, coordState }) => {
@@ -15,9 +16,9 @@ const MapUpdater = ({ center, coordState }) => {
   return null;
 };
 
-// 📌 Función para escalar la potencia en dBm a una escala logarítmica
+// Función para escalar la potencia en dBm a una escala logarítmica
 const scaleRadius = (dbm) => {
-  return Math.max(1, Math.pow(10, (dbm + 100) / 40)); // Evita radios negativos o muy pequeños
+  return Math.max(1, Math.pow(10, (dbm + 100) / 40)); 
 };
 
 const MapComponent = ({ latOrigenMap, lonOrigenMap, theta, potDbScal, coordState, maxDistance, latCsv, lonCsv }) => {
@@ -26,11 +27,11 @@ const MapComponent = ({ latOrigenMap, lonOrigenMap, theta, potDbScal, coordState
     return null;
   }
 
-  // 1️⃣ Calcular radios escalados
+  // Calcular radios escalados
   const radii = potDbScal.map(scaleRadius);
   const maxRadius = Math.max(...radii);
   
-  // 2️⃣ Calcular coordenadas de los puntos azules
+  // Calcular coordenadas de los puntos azules
   const bluePoints = theta.map((angle, index) => {
     const radianAngle = (angle * Math.PI) / 180;
     const scaledRadius = (radii[index] / maxRadius) * maxDistance;
@@ -41,48 +42,56 @@ const MapComponent = ({ latOrigenMap, lonOrigenMap, theta, potDbScal, coordState
     return [lat, lon];
   });
 
-  // 3️⃣ Cerrar la trayectoria conectando el último punto con el primero
+  // Cerrar la trayectoria conectando el último punto con el primero
   if (bluePoints.length > 1) {
     bluePoints.push(bluePoints[0]);
   }
 
   return (
-    <MapContainer center={[latOrigenMap, lonOrigenMap]} zoom={20} style={{ height: "100%", width: "100%" }}>
+    <MapContainer center={[latOrigenMap, lonOrigenMap]} zoom={19}  style={{ height: "800px", width: "100%" }}>
       <MapUpdater center={[latOrigenMap, lonOrigenMap]} coordState={coordState} />
-      <TileLayer
-        url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-        attribution='&copy; <a href="https://carto.com/">CartoDB</a>'
-        maxZoom={40}
-      />
+      <LayersControl position="topright">
+  <LayersControl.BaseLayer checked name="Mapa Normal">
+    <TileLayer
+      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      attribution='&copy; OpenStreetMap contributors'
+      maxZoom={30} // ⬅️ Aumenta el nivel de zoom
+    />
+  </LayersControl.BaseLayer>
+  
+  <LayersControl.BaseLayer name="Satélite">
+    <TileLayer
+      url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+      attribution='&copy; Esri, Maxar, Earthstar Geographics'
+      maxZoom={30} // ⬅️ Aumenta el nivel de zoom
+    />
+  </LayersControl.BaseLayer>
+</LayersControl>
 
-      {/* 🔴 Punto central (Antena) */}
+      {/* 🔴 Punto origen señal (Antena) */}
       <CircleMarker center={[latOrigenMap, lonOrigenMap]} radius={8} color="red" fillOpacity={0.8} />
 
-      {/* 🔵 Dibujar puntos con escala normalizada */}
+      {/* 🔵 Dibujar la línea que conecta los puntos */}
+      <Polyline positions={[...bluePoints, bluePoints[0]]} color="blue" />
+          <Polygon positions={bluePoints} color="blue" fillColor="blue" fillOpacity={0.2} />
+      {/* 🔵 Puntos con escala normalizada */}
       {bluePoints.slice(0, -1).map((point, index) => (
-        <Circle
-          key={`blue-${index}`}
-          center={point}
-          radius={0.5}
-          color="blue"
-          fillColor="blue"
-          fillOpacity={0.5}
-        />
+        <Circle key={`blue-${index}`} center={point} radius={0.8} color="blue" fillColor="blue" fillOpacity={0.5}>
+        <Tooltip direction="top" offset={[0, -5]} opacity={1} >
+          <span>N° {index + 1} <br /> Pot: {Number(potDbScal[index]).toFixed(5)} dBm</span>
+        </Tooltip>
+      </Circle>
       ))}
 
-      {/* 🔵 Dibujar la línea que conecta los puntos */}
-      <Polyline positions={bluePoints} color="blue" weight={2} />
+
 
       {/* 🟢 Dibujar puntos de latCsv y lonCsv con color verde */}
       {latCsv.map((lat, index) => (
-        <Circle
-          key={`green-${index}`}
-          center={[lat, lonCsv[index]]}
-          radius={0.6}
-          color="green"
-          fillColor="green"
-          fillOpacity={0.8}
-        />
+          <Circle key={`green-${index}`} center={[Number(lat), Number(lonCsv[index])]} radius={1.1} color="green" fillColor="green" fillOpacity={0.8} zIndexOffset={1000}>
+          <Tooltip direction="top" offset={[0, -5]} opacity={1} >
+            <span>N° {index + 1}<br />Lat: {Number(lat).toFixed(5)}<br />Lon: {Number(lonCsv[index]).toFixed(5)}</span>
+          </Tooltip>
+        </Circle>
       ))}
     </MapContainer>
   );

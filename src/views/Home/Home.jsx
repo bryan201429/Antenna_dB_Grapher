@@ -1396,6 +1396,7 @@ useEffect(()=>{
             {okumuraErrorFlagPrediction && <ErrorModal errorFlag={okumuraErrorFlagPrediction} message="Verificar datos para Predicción" setErrorFlag={SetokumuraErrorFlagPrediction}/>}
 
             <div className='mapParent'>
+                <h3 className='mapTitle'>PROYECCIÓN EN MAPA:</h3>
                 <Map latOrigenMap={latOrigenMap} lonOrigenMap={lonOrigenMap} theta={theta} potDbScal={potDbScal} coordState={coordState.validCoord} maxDistance={maxDistance} latCsv={latCsv} lonCsv={lonCsv} />
             </div>
             
