@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect,useState } from "react";
 import { MapContainer, TileLayer, CircleMarker, Circle, useMap, Polyline, Polygon, Tooltip, LayersControl, Rectangle } from "react-leaflet";
 import 'leaflet/dist/leaflet.css';
 
@@ -26,11 +26,18 @@ const MapComponent = ({ latOrigenMap, lonOrigenMap, theta, potDbScal, coordState
     console.error("potDbScal está vacío o no es válido:", potDbScal);
     return null;
   }
-
+  const [radioDinamico, setRadioDinamico] = useState(0.7);
+  useEffect(() => {
+    if (maxDistance > 200) {
+      setRadioDinamico(7);
+    } else {
+      setRadioDinamico(0.7);
+    }
+  }, [maxDistance]);
   // Calcular radios escalados
   const radii = potDbScal.map(scaleRadius);
   const maxRadius = Math.max(...radii);
-  
+
   // Calcular coordenadas de los puntos azules
   const bluePoints = theta.map((angle, index) => {
     const radianAngle = (angle * Math.PI) / 180;
@@ -69,14 +76,14 @@ const MapComponent = ({ latOrigenMap, lonOrigenMap, theta, potDbScal, coordState
 </LayersControl>
 
       {/* 🔴 Punto origen señal (Antena) */}
-      <CircleMarker center={[latOrigenMap, lonOrigenMap]} radius={8} color="red" fillOpacity={0.8} />
+      <CircleMarker center={[latOrigenMap, lonOrigenMap]} radius={7} color="red" fillOpacity={0.8} />
 
       {/* 🔵 Dibujar la línea que conecta los puntos */}
       <Polyline positions={[...bluePoints, bluePoints[0]]} color="blue" />
           <Polygon positions={bluePoints} color="blue" fillColor="blue" fillOpacity={0.2} />
       {/* 🔵 Puntos con escala normalizada */}
       {bluePoints.slice(0, -1).map((point, index) => (
-        <Circle key={`blue-${index}`} center={point} radius={0.8} color="blue" fillColor="blue" fillOpacity={0.5}>
+        <Circle key={`blue-${index}`} center={point} radius={radioDinamico} color="blue" fillColor="blue" fillOpacity={0.5}>
         <Tooltip direction="top" offset={[0, -5]} opacity={1} >
           <span>N° {index + 1} <br /> Pot: {Number(potDbScal[index]).toFixed(5)} dBm</span>
         </Tooltip>
@@ -87,7 +94,7 @@ const MapComponent = ({ latOrigenMap, lonOrigenMap, theta, potDbScal, coordState
 
       {/* 🟢 Dibujar puntos de latCsv y lonCsv con color verde */}
       {latCsv.map((lat, index) => (
-          <Circle key={`green-${index}`} center={[Number(lat), Number(lonCsv[index])]} radius={1.0} color="green" fillColor="green" fillOpacity={0.8} zIndexOffset={1000}>
+          <Circle key={`green-${index}`} center={[Number(lat), Number(lonCsv[index])]} radius={radioDinamico} color="green" fillColor="green" fillOpacity={0.8} zIndexOffset={1000}>
           <Tooltip direction="top" offset={[0, -5]} opacity={1} >
             <span>N° {index + 1}<br />Lat: {Number(lat).toFixed(5)}<br />Lon: {Number(lonCsv[index]).toFixed(5)}</span>
           </Tooltip>
