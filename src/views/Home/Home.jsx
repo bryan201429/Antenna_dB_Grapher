@@ -735,6 +735,7 @@ export default function Home(){
                 setPotTxEstimated(potEstOrigen);
             }
             else if(selectedModel===1){ // Modelo Okumura-Hata
+                console.log('Okumura selected')
                 if(okumuraReady==true){
                     for (let x = 0; x < csvDataLong-1; x++) {
                         let ahm=0;
@@ -860,10 +861,11 @@ export default function Home(){
         if(coordState.validCoord){
             console.log('validCoordToogle cambio: theta:',thetaAfterSpline.length)
             if(thetaAfterSpline.length!=0){ //SI hay una interpolación realizada antes
+                
                 console.log('SI hay una interpolación realizada antes')
                 setDoInterpolAfterCoordToogle(true);
             }else if(thetaAfterSpline.length==0){//NO hay una interpolación realizada antes
-                console.log('BI hay una interpolación realizada antes')
+                console.log('NO hay una interpolación realizada antes')
                 setDoInterpolAfterCoordToogle(false);
             }
         }
