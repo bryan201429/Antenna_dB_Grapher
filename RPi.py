@@ -12,13 +12,16 @@ import math
 import numpy as np
 import os 
 
+freq_mhz = float(input("Ingresa la frecuencia en MHz (por ejemplo, 430): "))
+gain = float(input("Ingresa la ganancia (por ejemplo, 40.2): "))
+
 np.set_printoptions(threshold=np.inf)
 sdr = RtlSdr()
 
 sdr.sample_rate = 2.4e6 # configure device
-sdr.center_freq = 430.0e6
+sdr.center_freq = freq_mhz*1e6
 freqMhz=sdr.center_freq/1e6
-sdr.gain = 0
+sdr.gain = gain
 sdr.set_bandwidth(2.5e3)
 #cant_muestras=128*1024
 cant_muestras=2*1024
